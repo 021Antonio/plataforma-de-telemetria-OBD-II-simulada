@@ -220,3 +220,9 @@ __marimo__/
 .streamlit/secrets.toml
 runs-night/
 .venv/
+
+# Ensaios (saída local; um exemplo fica em docs/ensaios/)
+runs/
+
+# banco local do make run
+/data/

@@ -1,0 +1,4 @@
+name: parado
+loop: false
+steps:
+  - {t: 0, speed: 0, throttle: 0.0}   # marcha lenta indefinida

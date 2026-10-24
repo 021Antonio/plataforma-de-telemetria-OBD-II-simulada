@@ -1,0 +1,171 @@
+:root {
+  color-scheme: light dark;
+  --fundo: #f5f6f8;
+  --painel: #ffffff;
+  --texto: #1d2330;
+  --discreto: #5b6475;
+  --destaque: #c2410c;
+  --borda: #d8dce4;
+  font-family: system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #14171d;
+    --painel: #1d222b;
+    --texto: #e6e9ef;
+    --discreto: #9aa3b2;
+    --destaque: #fb923c;
+    --borda: #2e3642;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--borda);
+}
+
+h1 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+}
+
+h3 {
+  font-size: 0.9rem;
+  margin: 1rem 0 0.5rem;
+  color: var(--discreto);
+}
+
+.status {
+  color: var(--discreto);
+  font-size: 0.875rem;
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+}
+
+section {
+  background: var(--painel);
+  border: 1px solid var(--borda);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+section.monitor {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: block;
+  margin: 0.5rem 0;
+}
+
+label.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 0.75rem;
+}
+
+input[type="range"] {
+  width: 60%;
+  vertical-align: middle;
+}
+
+input[type="number"],
+input[type="text"],
+select {
+  font: inherit;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  background: var(--fundo);
+  color: var(--texto);
+}
+
+input[type="text"] {
+  width: 6rem;
+  text-transform: uppercase;
+}
+
+button {
+  font: inherit;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  background: var(--fundo);
+  color: var(--texto);
+  cursor: pointer;
+}
+
+button:hover {
+  border-color: var(--destaque);
+}
+
+.variavel {
+  display: grid;
+  grid-template-columns: 11rem 1fr 4rem auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+}
+
+.variavel output {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.variavel.sobreposta .rotulo {
+  color: var(--destaque);
+  font-weight: 600;
+}
+
+.linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#dtc-lista {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+}
+
+pre#quadros {
+  margin: 0;
+  height: 16rem;
+  overflow: auto;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+#erro {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  color: var(--destaque);
+  font-weight: 600;
+}

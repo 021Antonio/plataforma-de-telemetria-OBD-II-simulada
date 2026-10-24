@@ -1,0 +1,9 @@
+name: rodovia
+loop: true
+steps:
+  - {t: 0,   speed: 0,   throttle: 0.0}    # marcha lenta
+  - {t: 5,   speed: 100, throttle: 0.55}   # entrada na rodovia
+  - {t: 80,  speed: 100, throttle: 0.30}   # cruzeiro
+  - {t: 100, speed: 120, throttle: 0.40}   # ultrapassagem
+  - {t: 140, speed: 120, throttle: 0.35}   # cruzeiro rápido
+  - {t: 160, speed: 0,   throttle: 0.0}    # desaceleração e parada

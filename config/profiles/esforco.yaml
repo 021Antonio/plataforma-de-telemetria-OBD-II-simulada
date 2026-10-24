@@ -1,0 +1,8 @@
+name: esforco
+loop: true
+steps:
+  - {t: 0,  speed: 0,  throttle: 0.0}
+  - {t: 2,  speed: 85, throttle: 0.95}   # aceleração máxima (rotação alta)
+  - {t: 20, speed: 40, throttle: 0.85}   # redução e nova aceleração
+  - {t: 30, speed: 85, throttle: 0.95}
+  - {t: 45, speed: 0,  throttle: 0.0}

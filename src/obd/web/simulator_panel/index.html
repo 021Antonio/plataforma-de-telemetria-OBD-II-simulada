@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel de controle do simulador</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Painel de controle do simulador</h1>
+    <span id="status" class="status">conectando…</span>
+  </header>
+
+  <main>
+    <section>
+      <h2>Variáveis</h2>
+      <div id="variaveis"></div>
+    </section>
+
+    <section>
+      <h2>Condução e ECU</h2>
+      <label>Perfil
+        <select id="perfil"></select>
+      </label>
+      <label class="inline">
+        <input type="checkbox" id="sem-resposta"> ECU sem resposta
+      </label>
+      <h3>Sementes</h3>
+      <label>Modelo <input type="number" id="semente-modelo" min="0" value="0"></label>
+      <label>ECU <input type="number" id="semente-ecu" min="0" value="0"></label>
+      <button id="reiniciar">Reiniciar</button>
+    </section>
+
+    <section>
+      <h2>Atraso e rede</h2>
+      <label>Atraso mín. (ms) <input type="range" id="lat-min" min="0" max="200" value="0"><output id="lat-min-v">0</output></label>
+      <label>Atraso máx. (ms) <input type="range" id="lat-max" min="0" max="200" value="0"><output id="lat-max-v">0</output></label>
+      <label>Perda de quadros <input type="range" id="rede-drop" min="0" max="1" step="0.01" value="0"><output id="rede-drop-v">0</output></label>
+      <label>Corrupção <input type="range" id="rede-corrupt" min="0" max="1" step="0.01" value="0"><output id="rede-corrupt-v">0</output></label>
+    </section>
+
+    <section>
+      <h2>Falhas (DTC)</h2>
+      <div class="linha">
+        <input type="text" id="dtc-codigo" value="P0300" maxlength="5" pattern="[PCBU][0-3][0-9A-F]{3}">
+        <label class="inline"><input type="checkbox" id="dtc-pendente"> pendente</label>
+        <button id="dtc-injetar">Injetar</button>
+        <button id="dtc-limpar">Limpar</button>
+      </div>
+      <ul id="dtc-lista"></ul>
+    </section>
+
+    <section class="monitor">
+      <h2>Monitor de quadros</h2>
+      <pre id="quadros"></pre>
+    </section>
+  </main>
+
+  <div id="erro" role="alert"></div>
+  <script src="panel.js"></script>
+</body>
+</html>

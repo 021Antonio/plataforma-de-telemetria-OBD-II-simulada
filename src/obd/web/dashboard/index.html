@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Telemetria OBD-II</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Telemetria OBD-II <small>simulada</small></h1>
+  <span id="conn-state" class="pill reconnecting">reconectando</span>
+  <span>Taxa <b id="rate">–</b> Hz</span>
+  <span>Ciclo <b id="cycle">–</b> ms</span>
+  <span>Latência <b id="latency">–</b> ms</span>
+</header>
+<div id="overlay" class="overlay" hidden>Sem dados — valores ocultos</div>
+<main id="panels">
+  <section class="card">
+    <h2>Rotação</h2>
+    <svg id="rpm-gauge" viewBox="-100 -100 200 160" role="img" aria-label="Conta-giros">
+      <path id="rpm-redline" fill="none" stroke="#d33" stroke-width="6"/>
+      <path d="M-78 45 A90 90 0 1 1 78 45" fill="none" stroke="#ccd" stroke-width="3"/>
+      <g id="rpm-ticks"></g>
+      <line id="rpm-needle" x1="0" y1="0" x2="0" y2="-72" stroke="#223" stroke-width="3" stroke-linecap="round"/>
+      <circle r="6" fill="#223"/>
+      <text id="rpm-text" y="38" text-anchor="middle" class="gtext">–</text>
+    </svg>
+  </section>
+  <section class="card">
+    <h2>Coletor de admissão</h2>
+    <svg id="map-gauge" viewBox="-100 -100 200 160" role="img" aria-label="Manômetro do coletor">
+      <path d="M-78 45 A90 90 0 1 1 78 45" fill="none" stroke="#ccd" stroke-width="3"/>
+      <g id="map-ticks"></g>
+      <line id="map-needle" x1="0" y1="0" x2="0" y2="-72" stroke="#223" stroke-width="3" stroke-linecap="round"/>
+      <circle r="6" fill="#223"/>
+      <text id="map-text" y="38" text-anchor="middle" class="gtext">–</text>
+    </svg>
+  </section>
+  <section class="card digits">
+    <div><h2>Velocidade</h2><span id="speed" class="big">–</span> km/h</div>
+    <div><h2>Temperatura</h2><span id="coolant" class="big">–</span> °C</div>
+    <div><h2>Combustível</h2><span id="fuel" class="big">–</span> %</div>
+  </section>
+  <section class="card bars">
+    <label>Borboleta <span id="val-throttle">–</span><div class="bar"><i id="bar-throttle"></i></div></label>
+    <label>Carga <span id="val-load">–</span><div class="bar"><i id="bar-load"></i></div></label>
+    <label>Ajuste de mistura <span id="val-trim">–</span><div class="bar centered"><i id="bar-trim"></i></div></label>
+    <label>Tensão <span id="val-voltage">–</span><div class="bar"><i id="bar-voltage"></i></div></label>
+  </section>
+  <section class="card wide">
+    <h2>Últimos 60 s
+      <select id="chart-series">
+        <option value="rpm">Rotação</option>
+        <option value="speed">Velocidade</option>
+        <option value="coolant">Temperatura</option>
+        <option value="throttle">Borboleta</option>
+        <option value="map">Coletor</option>
+        <option value="load">Carga</option>
+      </select>
+    </h2>
+    <svg id="chart" viewBox="0 0 600 150" preserveAspectRatio="none"><polyline id="chart-line" fill="none" stroke="#1769e0" stroke-width="2"/></svg>
+  </section>
+  <section class="card">
+    <h2>Diagnóstico <span id="mil" class="mil off">MIL</span></h2>
+    <ul id="dtc-list"><li class="muted">Nenhum DTC</li></ul>
+    <p id="dtc-desc" class="muted"></p>
+  </section>
+  <section class="card">
+    <h2>Eventos</h2>
+    <ul id="events"></ul>
+  </section>
+</main>
+<script src="gauges.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

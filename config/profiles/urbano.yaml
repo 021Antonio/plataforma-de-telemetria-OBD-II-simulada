@@ -1,0 +1,7 @@
+name: urbano
+loop: true
+steps:
+  - {t: 0,  speed: 0,  throttle: 0.0}    # marcha lenta
+  - {t: 10, speed: 50, throttle: 0.45}   # aceleração
+  - {t: 40, speed: 50, throttle: 0.20}   # cruzeiro
+  - {t: 50, speed: 0,  throttle: 0.0}    # desaceleração e parada

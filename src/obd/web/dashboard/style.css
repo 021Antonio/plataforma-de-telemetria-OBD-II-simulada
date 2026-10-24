@@ -1,0 +1,28 @@
+:root { --ok:#1a8a3c; --warn:#d98a00; --bad:#d33; --ink:#1c2230; --line:#dde1ea; }
+* { box-sizing: border-box; }
+body { margin:0; font:15px/1.4 system-ui,sans-serif; background:#fff; color:var(--ink); }
+header { display:flex; gap:1.5rem; align-items:center; padding:.6rem 1rem; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+header h1 { font-size:1.15rem; margin:0; margin-right:auto; }
+header small { color:#667; font-weight:400; }
+.pill { padding:.15rem .7rem; border-radius:1rem; color:#fff; font-weight:600; }
+.pill.connected { background:var(--ok); } .pill.reconnecting { background:var(--bad); } .pill.nodata { background:#778; }
+main { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1rem; padding:1rem; }
+.card { border:1px solid var(--line); border-radius:8px; padding:.8rem 1rem; }
+.card.wide { grid-column:1/-1; }
+h2 { font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:#556; margin:0 0 .4rem; }
+.gtext { font:600 20px system-ui; fill:var(--ink); }
+.digits { display:flex; justify-content:space-around; text-align:center; }
+.big { font-size:2.4rem; font-weight:700; }
+.bars label { display:block; margin-bottom:.6rem; }
+.bars label span { float:right; font-variant-numeric:tabular-nums; }
+.bar { height:12px; background:#eef0f5; border-radius:6px; overflow:hidden; position:relative; margin-top:.2rem; }
+.bar i { position:absolute; top:0; bottom:0; left:0; width:0; background:#1769e0; }
+#chart { width:100%; height:150px; background:#fafbfd; border:1px solid var(--line); }
+select { float:right; }
+.mil { padding:.1rem .5rem; border-radius:4px; font-weight:700; }
+.mil.off { background:#eef0f5; color:#99a; } .mil.on { background:var(--warn); color:#fff; }
+ul { list-style:none; padding:0; margin:0; max-height:170px; overflow:auto; }
+#dtc-list li { cursor:pointer; padding:.1rem 0; }
+.muted { color:#889; }
+.overlay { background:#e6e8ee; color:#445; text-align:center; padding:.5rem; font-weight:600; }
+body.stale main { filter:grayscale(1); opacity:.45; }
