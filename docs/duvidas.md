@@ -50,3 +50,24 @@ para seguir em frente. Revise e ajuste quando for necessário.
 4. **Modo 02.** Requisição `02 PID 00` (sempre quadro de congelamento 0); resposta com outro nº de quadro é rejeitada.
 5. **Modo 09.** Só o PID 0x02 (VIN); `Response.data` traz os 17 bytes ASCII. FC overflow levanta `ProtocolError`.
 6. **Testes.** `pythonpath = ["tests"]` no pytest para importar `tests/fakes.py` (`FakeClock`) sem conflito no mypy.
+
+## Tarefa 03 (transporte e ECU virtual)
+
+1. **Modelo de veículo.** `vehicle_model.py` é da tarefa 04. A ECU depende só de `PidSource`
+   (`value(pid) -> float`, em `simulator/ecu.py`); a tarefa 04 deve adaptar o modelo real a isso.
+2. **ECU como máquina de estados.** `Ecu.on_frame` recebe quadros e `Ecu.poll` devolve os devidos, com
+   relógio injetado (atraso testável com `FakeClock`). `LoopbackTransport` e `EcuCanNode` movem os bytes.
+3. **Log `(request_id, true_value)`.** `request_id` é o nº sequencial da requisição aceita pela ECU.
+   Só PIDs com valor físico (Modo 01 numérico) entram; máscaras, PID 0x01 e Modos 02/03/04/07/09 não.
+4. **Modo 03/07 sem DTCs.** A ECU responde `43 00` / `47 00` (N = 0), não silêncio. O `NO DATA` é da camada ELM327.
+5. **Freeze frame.** Capturado ao armazenar o primeiro DTC (não pendente); Modo 04 apaga. Sem ele, o Modo 02 é silêncio.
+6. **Respostas negativas.** Modo desconhecido: `7F modo 11`; Modo 09 com PID ≠ 02: `7F 09 12`; tamanho errado: `7F modo 13`.
+   PID do Modo 01 não suportado continua em silêncio.
+7. **Descoberta.** O bit de continuação (0x20, 0x40) só é anunciado se houver PID acima da faixa; 0x20/0x40 sem
+   anúncio ficam em silêncio. O PID 0x01 sempre é anunciado.
+8. **Timeout do transporte.** `timeout_ms` vale até o primeiro quadro (P2); depois do FF vale o N_Cr (1 s).
+   Estouro de N_Cr devolve `None`; quadro malformado propaga `ProtocolError`. O transporte não filtra o eco
+   (isso é do coletor) e descarta quadros residuais antes de cada requisição (CAN virtual).
+9. **FC do testador.** `bs` e `stmin` são parâmetros do transporte; o FC vai em 0x7E0. Uma requisição por vez (lock).
+10. **Atraso.** `delay_ms=(min, max)` sorteia uniformemente por requisição com `random.Random(seed)`; só o
+    primeiro quadro é atrasado. Perda, corrupção, ECU muda e `STmin` do lado da ECU ficam para a tarefa 04.

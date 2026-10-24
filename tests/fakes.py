@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Mapping
+
 
 class FakeClock:
     """Relógio injetável em segundos, avançado manualmente."""
@@ -14,3 +16,50 @@ class FakeClock:
 
     def advance(self, seconds: float) -> None:
         self.now += seconds
+
+    async def sleep(self, seconds: float) -> None:
+        """Substitui `asyncio.sleep`: só avança o relógio."""
+        self.advance(seconds)
+
+
+class FakeVehicleModel:
+    """Valores físicos constantes ou em rampa (`inicio + inclinacao * clock()`), por PID."""
+
+    def __init__(
+        self,
+        values: Mapping[int, float],
+        clock: Callable[[], float] | None = None,
+        slopes: Mapping[int, float] | None = None,
+    ) -> None:
+        self._values = dict(values)
+        self._slopes = dict(slopes or {})
+        self._clock = clock or (lambda: 0.0)
+
+    def value(self, pid: int) -> float:
+        return self._values[pid] + self._slopes.get(pid, 0.0) * self._clock()
+
+    def pids(self) -> frozenset[int]:
+        return frozenset(self._values)
+
+
+class ScriptedTransport:
+    """Responde a uma tabela fixa requisição -> resposta; o resto vira timeout (None)."""
+
+    def __init__(self, script: Mapping[bytes, bytes | None]) -> None:
+        self._script = dict(script)
+        self.calls: list[bytes] = []
+        self.is_open = False
+
+    @property
+    def name(self) -> str:
+        return "scripted"
+
+    async def open(self) -> None:
+        self.is_open = True
+
+    async def close(self) -> None:
+        self.is_open = False
+
+    async def request(self, payload: bytes, timeout_ms: int = 100) -> bytes | None:
+        self.calls.append(payload)
+        return self._script.get(payload)
