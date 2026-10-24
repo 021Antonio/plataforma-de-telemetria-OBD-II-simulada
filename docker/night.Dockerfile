@@ -1,6 +1,11 @@
 # Executor noturno isolado: Python 3.12 + make + Node + Claude Code, usuário sem privilégios.
 FROM python:3.12-bookworm
 
+# Rede instável no Docker Desktop: mais tempo e mais tentativas para o pip
+ENV PIP_DEFAULT_TIMEOUT=120 \
+    PIP_RETRIES=10 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
 RUN apt-get update \
  && apt-get install -y --no-install-recommends make git curl ca-certificates \
  && rm -rf /var/lib/apt/lists/*
@@ -14,7 +19,7 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
 
 RUN useradd -m -u 1000 dev \
  && python -m venv /opt/venv \
- && /opt/venv/bin/pip install -q pyyaml \
+ && /opt/venv/bin/pip install -q --retries 10 --timeout 120 pyyaml \
  && chown -R dev:dev /opt/venv
 
 COPY docker/night-entrypoint.sh /usr/local/bin/night-entrypoint
