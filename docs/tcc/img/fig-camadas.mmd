@@ -1,0 +1,12 @@
+flowchart TB
+  subgraph P["protocol (puro, sem I/O)"]
+    pids[pids] --- dtc[dtc] --- frames[frames] --- isotp[isotp] --- services[services]
+  end
+  T[transport] --> P
+  S[simulator] --> P
+  S --> T
+  C[collector] --> P
+  C --> T
+  V[server] --> P
+  W["web (dashboard e painel)"] --> V
+  W --> S

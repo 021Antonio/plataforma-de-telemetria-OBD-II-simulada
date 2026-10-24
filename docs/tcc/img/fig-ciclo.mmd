@@ -1,0 +1,14 @@
+flowchart TD
+  A["Início do ciclo"] --> B["Para cada PID do plano"]
+  B --> C["Envia requisição ao Transport"]
+  C --> D{"Resposta no prazo?"}
+  D -- "não" --> E["registra timeout<br/>aplica recuo se houver falhas seguidas"]
+  D -- "sim" --> F{"Eco de modo e PID ok?"}
+  F -- "não" --> G["conta como inválida"]
+  F -- "sim" --> H["decodifica e mede RTT"]
+  E --> I{"Há mais PIDs?"}
+  G --> I
+  H --> I
+  I -- "sim" --> B
+  I -- "não" --> J["publica Sample com seq e instante"]
+  J --> A

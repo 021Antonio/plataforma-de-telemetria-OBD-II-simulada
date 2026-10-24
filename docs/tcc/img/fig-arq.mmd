@@ -1,0 +1,10 @@
+flowchart TB
+  Painel["Painel de controle<br/>(porta 8001)"] --> Sim["Simulador de ECU<br/>modelo de veículo + falhas"]
+  Apps["Apps OBD de terceiros<br/>(TCP 35000)"] --> Elm["Servidor ELM327"]
+  Elm <--> Sim
+  Sim <--> Tr["Transporte plugável<br/>interface Transport"]
+  HW["Hardware futuro<br/>(etapa 2)"] -.-> Tr
+  Tr <--> Col["Coletor"]
+  Col -->|"HTTP ou MQTT"| Srv["Servidor FastAPI<br/>(porta 8000)"]
+  Srv -->|"WebSocket"| Dash["Dashboard web"]
+  Srv -->|"persiste"| DB[("SQLite")]

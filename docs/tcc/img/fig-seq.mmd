@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant C as Coletor
+  participant T as Transport
+  participant E as ECU virtual
+  C->>T: request(01 0C)
+  T->>E: CAN 0x7DF [02 01 0C 55 55 55 55 55]
+  E-->>T: CAN 0x7E8 [04 41 0C 1F 40 55 55 55]
+  T-->>C: 41 0C 1F 40
+  Note over C: valida modo+0x40 e PID<br/>rpm = (256·0x1F + 0x40)/4 = 2000

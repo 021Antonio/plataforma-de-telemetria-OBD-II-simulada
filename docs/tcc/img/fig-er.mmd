@@ -1,0 +1,10 @@
+erDiagram
+  runs ||--o{ samples : contem
+  runs ||--o{ dtc_events : contem
+  runs ||--o{ comm_events : contem
+  samples ||--o{ readings : contem
+  runs { int id string source int seed_model int seed_ecu string profile }
+  samples { int id int run_id int seq real ts_pub real ts_recv real latency_ms real cycle_ms }
+  readings { int id int sample_id string pid real value real rtt_ms real true_value }
+  dtc_events { int id int run_id string code string status int mil }
+  comm_events { int id int run_id real ts string kind string detail }
