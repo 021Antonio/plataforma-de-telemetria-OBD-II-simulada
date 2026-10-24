@@ -199,7 +199,8 @@ async def test_protocol_queries(rig: tuple[Ecu, Elm327Server]) -> None:
 @pytest.mark.parametrize(
     "cmd",
     ["ATAT0", "ATAT1", "ATAT2", "ATST 32", "ATSTFF", "ATSH 7E0", "ATSH7DF", "ATCAF0", "ATCAF1",
-     "ATAL", "ATCRA 7E8", "ATCRA", "ATS1", "ATS0"],
+     "ATAL", "ATCRA 7E8", "ATCRA", "ATS1", "ATS0", "ATM0", "ATR1", "ATPC", "ATJHF1",
+     "ATFE", "ATCAF 0", "ATV0", "ATSS", "ATCV 1200", "ATKW0", "ATIB10", "ATBI"],
 )  # fmt: skip
 async def test_accepted_at_commands(rig: tuple[Ecu, Elm327Server], cmd: str) -> None:
     _, server = rig
@@ -226,3 +227,27 @@ async def test_unsupported_service_and_pid_answer_no_data(rig: tuple[Ecu, Elm327
         await c.send("ATH1")
         assert await c.send("0600") == f"NO DATA{END}"
         assert await c.send("0900") == f"7E8 06 49 00 40 00 00 00{END}"
+
+
+async def test_identification_commands(rig: tuple[Ecu, Elm327Server]) -> None:
+    _, server = rig
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.send("ATE0")
+        assert await c.send("ATI") == f"ELM327 v1.5{END}"
+        assert await c.send("AT I") == f"ELM327 v1.5{END}"
+        assert await c.send("ATWS") == f"ELM327 v1.5{END}"
+        assert await c.send("ATIGN") == f"ON{END}"
+
+
+async def test_command_log_when_enabled(
+    rig: tuple[Ecu, Elm327Server],
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _, server = rig
+    monkeypatch.setenv("OBD_ELM327_LOG", "1")
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.send("ATE0")
+        await c.send("ATI")
+    out = capsys.readouterr().out
+    assert "ELM327 <<" in out and "'ATI'" in out and "ELM327 v1.5" in out

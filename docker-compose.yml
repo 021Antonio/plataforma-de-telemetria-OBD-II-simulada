@@ -9,6 +9,8 @@ services:
       - "8000:8000"
       - "8001:8001"
       - "35000:35000"
+    environment:
+      OBD_ELM327_LOG: "${OBD_ELM327_LOG:-0}"  # 1 imprime cada comando AT/OBD recebido
     volumes:
       - obd-data:/app/data
   mosquitto:
