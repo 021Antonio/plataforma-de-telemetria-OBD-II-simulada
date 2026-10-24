@@ -22,6 +22,13 @@ RUN useradd -m -u 1000 dev \
  && /opt/venv/bin/pip install -q --retries 10 --timeout 120 pyyaml \
  && chown -R dev:dev /opt/venv
 
+# Chromium para capturas de tela (tarefas de dashboard); fica fora do HOME e legível a todos
+ENV PLAYWRIGHT_BROWSERS_PATH=/opt/pw
+RUN /opt/venv/bin/pip install -q playwright \
+ && /opt/venv/bin/playwright install --with-deps chromium \
+ && chmod -R a+rX /opt/pw \
+ && rm -rf /var/lib/apt/lists/*
+
 COPY docker/night-entrypoint.sh /usr/local/bin/night-entrypoint
 RUN sed -i 's/\r$//' /usr/local/bin/night-entrypoint && chmod +x /usr/local/bin/night-entrypoint
 
