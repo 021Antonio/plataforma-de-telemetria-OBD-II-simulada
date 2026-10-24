@@ -85,7 +85,15 @@ Sem perdas de amostras no servidor em nenhum caso: o coletor publica sempre, com
 ### E6: cliente ELM327 de soquete cru (19 comandos)
 
 19 de 19 respostas no formato esperado (`ATZ`, `ATE0`, `ATL0`, `ATS1`, `ATH0`, `ATSP0`, `ATDP`, `ATRV`, `0100`, `0120`, `010C`, `010D`, `0105`, `0111`, `0101`, `03`, `0902`, `01FF`, `XYZ`).
-Validação com app de terceiros: **pendente** (interativa).
+Validação com app de terceiros: **pendente** (interativa); o cliente de biblioteca está em "Cliente real".
+
+### Cliente real
+
+python-OBD 0.7.3 (`pip install obd`, em venv temporário) apontado para `socket://127.0.0.1:<porta>`, `tests/integration/test_elm327_python_obd.py` (`pytest -m realclient`, precisa de rede).
+
+- **Antes da tarefa 16:** conectava ("ISO 15765-4 (CAN 11/500)"), mas não lia nenhum PID. O servidor ignorava `ATH1` (python-OBD descartava o quadro "for being odd"), respondia `?` a `ATDPN` e `ATTP6`, e `0900`/`0600` voltavam `7F ...`.
+- **Depois:** lê "Car Connected", protocolo `ISO 15765-4 (CAN 11/500)`, RPM, velocidade, temperatura do líquido, carga, borboleta e combustível (dentro da resolução do PID), RPM sobreposto em 3000 e DTCs (P0300 injetado; lista vazia sem falhas).
+- **Não lido:** nada do que o teste cobre ficou de fora. Modo 06 responde `NO DATA`; apps de celular (Car Scanner, Torque, OBD Auto Doctor) seguem sem validação.
 
 ### E7: HTTP contra MQTT (60 s cada)
 

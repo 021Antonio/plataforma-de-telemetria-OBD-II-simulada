@@ -10,17 +10,23 @@ import asyncio
 import contextlib
 import re
 
+from obd.protocol.isotp import segment
 from obd.protocol.pids import PIDS
+from obd.protocol.services import NEGATIVE
 from obd.transport.base import Transport
 
 PORT = 35000
 VERSION = "ELM327 v1.5"
 PROTOCOL = "ISO 15765-4 (CAN 11/500)"
+DESCRIPTION = "OBD-II simulator (software-in-the-loop)"
+ECU_HEADER = "7E8"
 PROMPT = ">"
 MAX_REQUEST = 7  # um quadro único ISO-TP
 _VOLTAGE_PID = 0x42
 _HEX = re.compile(r"[0-9A-F]+")
-_AT_OK = ("E", "L", "S", "H")  # ATE/ATL/ATS/ATH tratados à parte
+_AT_FLAGS = {"E": "echo", "L": "linefeed", "S": "spaces", "H": "headers"}
+# Aceitos com `OK` e sem efeito: ATAT, ATST, ATSH, ATCAF, ATAL, ATCRA, ATD.
+_AT_ACCEPTED = ("AT", "ST", "SH", "CAF", "CRA", "AL", "D")
 
 
 class _Session:
@@ -35,6 +41,7 @@ class _Session:
         self.spaces = True
         self.headers = False
         self.searched = False
+        self.auto = True  # ATSP0 (automático) ou ATSP6/ATTP6 (fixo)
 
 
 class Elm327Server:
@@ -115,23 +122,29 @@ class Elm327Server:
             prefix = ["SEARCHING..."]
         s.searched = True
         resp = await self._backend.request(payload, self._timeout_ms)
-        if resp is None or resp == bytes([0x43, 0x00]):
-            return [*prefix, "NO DATA"]
-        return [*prefix, _hex(resp, s.spaces)]
+        if resp is None or resp[0] == NEGATIVE or resp == bytes([0x43, 0x00]):
+            return [*prefix, "NO DATA"]  # o chip real não repete a negativa da ECU
+        return [*prefix, *format_response(resp, headers=s.headers, spaces=s.spaces)]
 
     async def _at(self, s: _Session, arg: str) -> list[str]:
         if arg == "Z":
             s.reset()
             return [VERSION]
         if arg == "DP":
-            return [PROTOCOL]
+            return [f"AUTO, {PROTOCOL}" if s.auto else PROTOCOL]
+        if arg == "DPN":
+            return ["A6" if s.auto else "6"]
         if arg == "RV":
             return [await self._voltage()]
-        if arg[:1] in _AT_OK and arg[1:] in ("0", "1"):
-            on = arg[1] == "1"
-            setattr(s, {"E": "echo", "L": "linefeed", "S": "spaces", "H": "headers"}[arg[0]], on)
+        if arg == "@1":
+            return [DESCRIPTION]
+        if arg[:1] in _AT_FLAGS and arg[1:] in ("0", "1"):
+            setattr(s, _AT_FLAGS[arg[0]], arg[1] == "1")
             return ["OK"]
-        if arg in ("SP6", "SP0"):
+        if arg[:2] in ("SP", "TP") and arg[2:].lstrip("A") in ("0", "6"):
+            s.auto = arg[2:] == "0" or arg[2:3] == "A"
+            return ["OK"]
+        if arg.startswith(_AT_ACCEPTED):
             return ["OK"]
         return ["?"]
 
@@ -149,3 +162,28 @@ def _first_terminator(buf: bytes) -> int | None:
 
 def _hex(data: bytes, spaces: bool) -> str:
     return (data.hex(" ") if spaces else data.hex()).upper()
+
+
+def format_response(resp: bytes, *, headers: bool, spaces: bool) -> list[str]:
+    """Linhas de uma resposta: só os dados (`ATH0`) ou um quadro CAN por linha (`ATH1`).
+
+    Com cabeçalhos vem o identificador da ECU e o quadro ISO-TP sem o preenchimento 0x55, como
+    o chip real. Sem cabeçalhos a resposta multiquadro sai remontada em uma linha."""
+    if not headers:
+        return [_hex(resp, spaces)]
+    lines = []
+    for i, frame in enumerate(segment(resp)):
+        used = len(frame) if frame[0] >> 4 == 1 else _frame_length(frame, resp, i)
+        lines.append(_hex_row(frame[:used], spaces))
+    return lines
+
+
+def _frame_length(frame: bytes, resp: bytes, index: int) -> int:
+    """Bytes úteis do SF (1 + N) ou do CF (1 + restante), sem o preenchimento."""
+    if frame[0] >> 4 == 0:
+        return 1 + frame[0]
+    return 1 + min(7, len(resp) - 6 - 7 * (index - 1))
+
+
+def _hex_row(frame: bytes, spaces: bool) -> str:
+    return f"{ECU_HEADER} {_hex(frame, True)}" if spaces else ECU_HEADER + _hex(frame, False)

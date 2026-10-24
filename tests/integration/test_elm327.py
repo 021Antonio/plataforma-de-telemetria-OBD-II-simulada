@@ -56,7 +56,7 @@ async def test_fake_client_script(rig: tuple[Ecu, Elm327Server]) -> None:
                 ("0100", f"SEARCHING...\r41 00 9C 3A 80 01{END}"),
                 ("010C", f"41 0C 30 DE{END}"),
                 ("03", f"NO DATA{END}"),
-                ("ATDP", f"ISO 15765-4 (CAN 11/500){END}"),
+                ("ATDP", f"AUTO, ISO 15765-4 (CAN 11/500){END}"),
                 ("ATRV", f"14.0V{END}"),
             ]
         )
@@ -156,3 +156,73 @@ def test_parse_reply_variants() -> None:
     assert parse_reply("?\r\r") is None
     multi = "014\r0: 49 02 01 39 42 57\r1: 5A 5A 5A 33 37 37\r"
     assert parse_reply(multi) == bytes.fromhex("4902013942575A5A5A333737")
+
+
+async def test_headers_on_single_and_multiframe(rig: tuple[Ecu, Elm327Server]) -> None:
+    _, server = rig
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.run_script(
+            [
+                ("ATE0", f"ATE0\rOK{END}"),
+                ("ATH1", f"OK{END}"),
+                ("0100", f"SEARCHING...\r7E8 06 41 00 9C 3A 80 01{END}"),
+                ("010C", f"7E8 04 41 0C 30 DE{END}"),
+            ]
+        )
+        reply = await c.send("0902")
+        rows = reply.strip("\r>").split("\r")
+        assert rows[0].startswith("7E8 10 14 49 02 01") and rows[1].startswith("7E8 21")
+        await c.send("ATH0")
+        assert await c.send("010C") == f"41 0C 30 DE{END}"
+
+
+async def test_protocol_queries(rig: tuple[Ecu, Elm327Server]) -> None:
+    _, server = rig
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.run_script(
+            [
+                ("ATE0", f"ATE0\rOK{END}"),
+                ("ATSP0", f"OK{END}"),
+                ("ATDPN", f"A6{END}"),
+                ("ATDP", f"AUTO, ISO 15765-4 (CAN 11/500){END}"),
+                ("ATTP6", f"OK{END}"),
+                ("ATDPN", f"6{END}"),
+                ("ATDP", f"ISO 15765-4 (CAN 11/500){END}"),
+                ("ATTP0", f"OK{END}"),
+                ("ATDPN", f"A6{END}"),
+                ("ATSP6", f"OK{END}"),
+                ("ATDPN", f"6{END}"),
+            ]
+        )
+
+
+@pytest.mark.parametrize(
+    "cmd",
+    ["ATAT0", "ATAT1", "ATAT2", "ATST 32", "ATSTFF", "ATSH 7E0", "ATSH7DF", "ATCAF0", "ATCAF1",
+     "ATAL", "ATCRA 7E8", "ATCRA", "ATS1", "ATS0"],
+)  # fmt: skip
+async def test_accepted_at_commands(rig: tuple[Ecu, Elm327Server], cmd: str) -> None:
+    _, server = rig
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.send("ATE0")
+        assert await c.send(cmd) == f"OK{END}"
+
+
+async def test_at_description_and_unknown_at(rig: tuple[Ecu, Elm327Server]) -> None:
+    _, server = rig
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.send("ATE0")
+        assert await c.send("AT@1") == f"OBD-II simulator (software-in-the-loop){END}"
+        assert await c.send("ATQQ") == f"?{END}"
+
+
+async def test_unsupported_service_and_pid_answer_no_data(rig: tuple[Ecu, Elm327Server]) -> None:
+    _, server = rig
+    async with FakeElm327Client("127.0.0.1", server.port) as c:
+        await c.send("ATE0")
+        assert await c.send("0600") == f"NO DATA{END}"
+        assert await c.send("0905") == f"NO DATA{END}"
+        assert await c.send("0900") == f"49 00 40 00 00 00{END}"
+        await c.send("ATH1")
+        assert await c.send("0600") == f"NO DATA{END}"
+        assert await c.send("0900") == f"7E8 06 49 00 40 00 00 00{END}"
