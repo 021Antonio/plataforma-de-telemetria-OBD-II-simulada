@@ -226,3 +226,4 @@ runs/
 
 # banco local do make run
 /data/
+*.exe
