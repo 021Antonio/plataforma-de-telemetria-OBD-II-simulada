@@ -175,4 +175,4 @@ para seguir em frente. Revise e ajuste quando for necessário.
 2. **Latência no cabeçalho** = relógio do navegador − `ts` da amostra (mesma máquina; com relógios diferentes seria enviesada). A spec não define a fonte.
 3. **Escalas assumidas:** rotação 0–8000 (faixa vermelha em 6000), coletor −1 a +1,5 bar relativo a 101,325 kPa, tensão 9–16 V; faixas de cor de temperatura/combustível/velocidade são palpites.
 4. **Gráfico** usa o relógio do navegador na chegada, não o `ts` da amostra, e só guarda os 60 s recebidos (o replay do WS chega de uma vez e fica comprimido na borda direita).
-5. **"Sem ssinal":** após 3 s sem amostra, a tela fica cinza com aviso; os números antigos permanecem apenas esmaecidos sob o aviso.
+5. **"Sem sinal":** após 3 s sem amostra, a tela fica cinza com aviso; os números antigos permanecem apenas esmaecidos sob o aviso.
