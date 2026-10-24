@@ -176,3 +176,15 @@ para seguir em frente. Revise e ajuste quando for necessário.
 3. **Escalas assumidas:** rotação 0–8000 (faixa vermelha em 6000), coletor −1 a +1,5 bar relativo a 101,325 kPa, tensão 9–16 V; faixas de cor de temperatura/combustível/velocidade são palpites.
 4. **Gráfico** usa o relógio do navegador na chegada, não o `ts` da amostra, e só guarda os 60 s recebidos (o replay do WS chega de uma vez e fica comprimido na borda direita).
 5. **"Sem sinal":** após 3 s sem amostra, a tela fica cinza com aviso; os números antigos permanecem apenas esmaecidos sob o aviso.
+
+## Tarefa 08 (painel de controle)
+
+1. **Caminho dos arquivos.** A tarefa cita `simulator/control_api.py` e `web/simulator_panel/`. Decisão: `src/obd/simulator/control_api.py` e `src/obd/web/simulator_panel/`, seguindo o layout do CLAUDE.md.
+2. **Faixa dos overrides.** A spec não define faixas. Decisão: a faixa aceita é a que o PID consegue codificar (rpm 0–16383,75; velocidade 0–255; arrefecimento −40–215; borboleta e combustível 0–100; tensão 0–65,535). Fora disso, `422`. Os sliders do painel usam faixas realistas (rpm 0–7000, tensão 9–16 V), que são escolha de interface.
+3. **Variável desconhecida** em `/sim/override/{nome}` retorna `404`; corpo inválido retorna `422` (validação do Pydantic).
+4. **Estado físico x valor servido.** `GET /sim/state` traz `variaveis` (o que a ECU responde, já com override) e `fisico` (estado limpo do modelo). Assim o override de 3000 rpm aparece no estado e na leitura do PID 0x0C.
+5. **Monitor de quadros.** A ECU não expõe o tráfego, então `Simulator` registra os quadros de entrada (`on_frame`) e de saída (`poll`) sem mudar `ecu.py`. `WS /sim/stream` envia, a cada 100 ms, o estado e os quadros novos desde a mensagem anterior.
+6. **Reiniciar com semente** reconstrói modelo, ECU e falhas, mantendo o perfil de condução e o monitor. Overrides, DTCs, atraso e rede voltam aos valores iniciais.
+7. **Limites de entrada.** Atraso de 0 a 1000 ms (acima disso o coletor de 100 ms já estoura o timeout); perda e corrupção de 0 a 1; sementes de 0 a 2³²−1. Limites escolhidos, não definidos na spec.
+8. **Nomes das variáveis** seguem a spec: `rpm`, `speed`, `coolant`, `throttle`, `fuel`, `voltage`. O estado usa chaves em português (`variaveis`, `fisico`, `perfil`, `latencia`, `rede`, `sem_resposta`).
+9. **Painel servido em `/`** da aplicação do simulador, montado depois das rotas da API. Não há comando para subir a porta 8001 ainda: o `make run` continua sem alvo real.
