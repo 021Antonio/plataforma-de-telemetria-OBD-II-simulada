@@ -168,3 +168,11 @@ para seguir em frente. Revise e ajuste quando for necessário.
 6. **Teste `broker`.** `addopts` ganhou `-m "not broker"`; rode `pytest -m broker` com `docker compose --profile mqtt up -d mosquitto`.
    O teste real não foi executado aqui (sem Docker/broker); foi pulado por design.
 7. **`docker-compose.yml`.** Só tem o Mosquitto; os serviços do app não entraram (ainda não há `make run`).
+
+## Tarefa 07 (dashboard)
+
+1. **Sem captura de tela.** Não há navegador/Playwright no ambiente; o checklist manual (valores mudam, MIL com P0300, "reconectando") e a validação visual de layout ficam pendentes. Coberto por teste: HTML servido, `node --check`, ids usados pelo JS existem no HTML, lógica pura (`gauges.js`) via Node e entrega da amostra no `WS /ws/stream`.
+2. **Latência no cabeçalho** = relógio do navegador − `ts` da amostra (mesma máquina; com relógios diferentes seria enviesada). A spec não define a fonte.
+3. **Escalas assumidas:** rotação 0–8000 (faixa vermelha em 6000), coletor −1 a +1,5 bar relativo a 101,325 kPa, tensão 9–16 V; faixas de cor de temperatura/combustível/velocidade são palpites.
+4. **Gráfico** usa o relógio do navegador na chegada, não o `ts` da amostra, e só guarda os 60 s recebidos (o replay do WS chega de uma vez e fica comprimido na borda direita).
+5. **"Sem ssinal":** após 3 s sem amostra, a tela fica cinza com aviso; os números antigos permanecem apenas esmaecidos sob o aviso.
