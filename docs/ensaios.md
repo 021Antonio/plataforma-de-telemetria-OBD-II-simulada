@@ -97,12 +97,17 @@ python-OBD 0.7.3 (`pip install obd`, em venv temporário) apontado para `socket:
 
 ### E7: HTTP contra MQTT (60 s cada)
 
+Executado em 24/10/2026 com Mosquitto 2 real (`eclipse-mosquitto:2`, contêiner no mesmo computador), o simulador e o coletor em outro contêiner Linux sobre WSL2 (Python 3.12, 32 núcleos lógicos), mesma semente (modelo 1, ECU 1), perfil urbano, 10 PIDs a cada 100 ms e atraso simulado da ECU entre 7 e 13 ms. Os dois canais rodaram em sequência na mesma máquina. Fonte dos números: `runs/mosquitto/e7.json` (campo `broker: "mosquitto"` na execução MQTT).
+
 | Canal | Latência média (ms) | p95 (ms) | Máx (ms) | Perdas | Ciclos/s |
 | --- | --- | --- | --- | --- | --- |
-| HTTP (uvicorn local) | 3,0 | 3,5 | 44,0 | 0 | 7,9 |
-| MQTT (**broker em memória**) | 0,2 | 0,3 | 12,2 | 0 | 9,3 |
+| HTTP (uvicorn local) | 3,0 | 3,6 | 43,5 | 0 | 7,7 |
+| MQTT (Mosquitto real) | 0,6 | 0,8 | 13,4 | 0 | 9,3 |
 
-Não havia Mosquitto nesta máquina: a linha MQTT usa o broker simulado de `tests/fakes.py`, sem rede nem broker real. Ela mede só o custo de serialização e de despacho; **não é comparável ao HTTP**. Repita com `docker compose --profile mqtt up -d` antes do E7 para o número real.
+- Perdas, duplicações e timeouts: 0 nos dois canais (463 ciclos no HTTP e 558 no MQTT, todos recebidos). Erro de decodificação acima de meia resolução: 0.
+- Tempo de ciclo do coletor e RTT da ECU praticamente iguais nos dois canais (ciclo p95 de 115,8 ms no HTTP e 115,7 ms no MQTT; RTT p95 de 13,5 ms nos dois), porque dependem da ECU simulada e não do canal de publicação.
+- A diferença de ciclos por segundo (7,7 contra 9,3) vem do tempo gasto publicando: no HTTP o coletor espera a resposta de cada envio. Não foi investigada além disso.
+- Condição de rede: publicador e broker no mesmo computador, pela rede interna do Docker. Os números descrevem o custo do canal nesse arranjo e não representam um enlace real entre máquinas diferentes.
 
 ## Repetir em uma segunda máquina
 
