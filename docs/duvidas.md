@@ -199,3 +199,16 @@ para seguir em frente. Revise e ajuste quando for necessário.
 6. **Comandos fora do escopo** (`ATST`, `ATAT`, `ATSH`, outros `ATSPn`…) devolvem `?`. Apps de terceiros podem enviá-los; ampliar se a validação manual falhar.
 7. **Cliente.** Timeout do primeiro pedido é de ao menos 5 s (busca de protocolo); `NO DATA`, `?` e erros do chip viram `None` (o coletor trata como timeout). `build_transport("elm327_tcp")` ganhou `host` e `port`.
 8. **Validação manual com app de terceiros** (`docs/ensaios.md`) não foi feita: exige cliente real e é interativa. Pendente.
+
+## Tarefa 10 (ensaios)
+
+1. **Um processo, tarefas `asyncio`.** A tarefa pede "processos", mas o valor real só existe em `ecu.log`, dentro do processo da ECU. Decisão: simulador, coletor e servidor (uvicorn real, HTTP em `127.0.0.1`, SQLite em arquivo) rodam como tarefas de um processo. O coletor usa `LoopbackTransport`, então os ensaios não passam por `python-can` nem medem o custo do barramento virtual; o campo `source` das amostras diz `can_virtual`.
+2. **Junção do valor real.** `ecu.log` guarda `(request_id, valor)`, mas o `Sample` não tem `request_id`. `TruthTransport` anota o valor logo após cada requisição `01 PID` e `TruthPublisher` o associa ao `seq` na hora de publicar. Depois o executor grava `readings.true_value` no SQLite (`<ensaio>_<run>.db`).
+3. **Ciclo de 10 PIDs.** Os 10 PIDs implementados (`0x06` inclusive) entram em todo ciclo; o plano padrão do coletor lê 5 deles a cada 5 ciclos e subestimaria o ciclo de RNF01.
+4. **Critérios dos RNF.** RNF01 e RNF02 pelo p95 (mais rígido que a média). RNF03 = publicadas − recebidas + lacunas de `seq`. RNF04: IDs de 11 bits e RTT máximo ≤ P2 (50 ms); os 500 kbit/s são nominais (barramento virtual não tem taxa) e não são medidos.
+5. **Falha do E1.** P0300 agendada em 100/240 da duração (100 s no ensaio completo). Detecção = instante em que o coletor publica o relatório com o código menos o instante agendado; o piso é o período de 2 s do PID 0x01.
+6. **Parâmetros que a spec não fixa.** E2: atraso fixo (mín = máx). E4: 30 s por execução; perda aplicada às requisições recebidas pela ECU (o coletor vê timeout de 100 ms); "recuperação" = maior sequência de ciclos seguidos sem leitura do mesmo PID. E5: 100 repetições, STmin enviado pelo testador no FC. E6: cliente de soquete cru com 19 comandos e respostas esperadas por expressão regular; não substitui a validação com app de terceiros.
+7. **E7 sem Mosquitto.** Se não há broker em `localhost:1883`, o canal MQTT usa o `FakeBroker` em memória de `tests/fakes.py`; o JSON registra `broker`. Nesse caso a latência MQTT não inclui rede nem broker real e não é comparável ao HTTP sem ressalva.
+8. **Pacote `tests/benchmarks`.** Tem `__init__.py` e imports relativos para funcionar em `python -m tests.benchmarks.eN` e no pytest (`benchmarks.*`). `tests/` não pode ganhar `__init__.py`: quebra o `import fakes` dos outros testes no mypy.
+9. **Desvio padrão** amostral (n − 1); percentis por posto mais próximo, como em `GET /api/stats`.
+10. **Segunda máquina.** Não há segunda máquina aqui: `docs/ensaios.md` traz as instruções, mas só uma máquina foi medida. Pendente.

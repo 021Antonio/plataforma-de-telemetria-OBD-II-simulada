@@ -1,0 +1,54 @@
+{
+  "ensaio": "E6",
+  "gerado_em": "2026-10-24T05:43:40+00:00",
+  "maquina": {
+    "node": "1c30fa31e606",
+    "so": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+    "python": "3.12.15",
+    "cpu": "x86_64",
+    "nucleos": 32
+  },
+  "config": {
+    "comandos": 19
+  },
+  "runs": [
+    {
+      "label": "elm327",
+      "config": {
+        "label": "elm327",
+        "duration_s": 0.0,
+        "pids": [
+          12,
+          11,
+          17,
+          13,
+          4,
+          5,
+          15,
+          47,
+          66,
+          6
+        ],
+        "delay_ms": [
+          7,
+          13
+        ],
+        "frame_loss": 0.0,
+        "fault_code": null,
+        "fault_at_s": 0.0,
+        "channel": "http",
+        "seed_model": 1,
+        "seed_ecu": 1,
+        "profile": "urbano",
+        "timeout_ms": 100,
+        "interval_ms": 100.0
+      },
+      "metrics": {
+        "comandos": 19,
+        "compativeis": 19,
+        "compatibilidade": 1.0,
+        "falhas": []
+      }
+    }
+  ]
+}

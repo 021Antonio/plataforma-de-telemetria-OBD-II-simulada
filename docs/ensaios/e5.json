@@ -1,0 +1,156 @@
+{
+  "ensaio": "E5",
+  "gerado_em": "2026-10-24T05:43:38+00:00",
+  "maquina": {
+    "node": "1c30fa31e606",
+    "so": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.36",
+    "python": "3.12.15",
+    "cpu": "x86_64",
+    "nucleos": 32
+  },
+  "config": {
+    "stmin_ms": [
+      0,
+      1,
+      10
+    ],
+    "repeticoes": 100
+  },
+  "runs": [
+    {
+      "label": "stmin0",
+      "config": {
+        "label": "stmin0",
+        "duration_s": 0.0,
+        "pids": [
+          12,
+          11,
+          17,
+          13,
+          4,
+          5,
+          15,
+          47,
+          66,
+          6
+        ],
+        "delay_ms": [
+          7,
+          13
+        ],
+        "frame_loss": 0.0,
+        "fault_code": null,
+        "fault_at_s": 0.0,
+        "channel": "http",
+        "seed_model": 1,
+        "seed_ecu": 1,
+        "profile": "urbano",
+        "timeout_ms": 100,
+        "interval_ms": 100.0
+      },
+      "metrics": {
+        "remontagem_ms": {
+          "n": 100.0,
+          "mean": 1.1499976799950673,
+          "std": 0.03676214092318507,
+          "median": 1.1405790000935667,
+          "p95": 1.2214469998070854,
+          "p99": 1.2339600007180707,
+          "max": 1.24131199936528
+        },
+        "vin_incorreto": 0
+      },
+      "stmin_ms": 0
+    },
+    {
+      "label": "stmin1",
+      "config": {
+        "label": "stmin1",
+        "duration_s": 0.0,
+        "pids": [
+          12,
+          11,
+          17,
+          13,
+          4,
+          5,
+          15,
+          47,
+          66,
+          6
+        ],
+        "delay_ms": [
+          7,
+          13
+        ],
+        "frame_loss": 0.0,
+        "fault_code": null,
+        "fault_at_s": 0.0,
+        "channel": "http",
+        "seed_model": 1,
+        "seed_ecu": 1,
+        "profile": "urbano",
+        "timeout_ms": 100,
+        "interval_ms": 100.0
+      },
+      "metrics": {
+        "remontagem_ms": {
+          "n": 100.0,
+          "mean": 2.2631316999741102,
+          "std": 0.057363316869838435,
+          "median": 2.2474180000244814,
+          "p95": 2.358187000027101,
+          "p99": 2.4509650002073613,
+          "max": 2.467890999469091
+        },
+        "vin_incorreto": 0
+      },
+      "stmin_ms": 1
+    },
+    {
+      "label": "stmin10",
+      "config": {
+        "label": "stmin10",
+        "duration_s": 0.0,
+        "pids": [
+          12,
+          11,
+          17,
+          13,
+          4,
+          5,
+          15,
+          47,
+          66,
+          6
+        ],
+        "delay_ms": [
+          7,
+          13
+        ],
+        "frame_loss": 0.0,
+        "fault_code": null,
+        "fault_at_s": 0.0,
+        "channel": "http",
+        "seed_model": 1,
+        "seed_ecu": 1,
+        "profile": "urbano",
+        "timeout_ms": 100,
+        "interval_ms": 100.0
+      },
+      "metrics": {
+        "remontagem_ms": {
+          "n": 100.0,
+          "mean": 11.58384496002327,
+          "std": 0.4535086840972683,
+          "median": 11.352373500358226,
+          "p95": 12.259797000297112,
+          "p99": 12.291619000279752,
+          "max": 12.310125999647425
+        },
+        "vin_incorreto": 0
+      },
+      "stmin_ms": 10
+    }
+  ]
+}
