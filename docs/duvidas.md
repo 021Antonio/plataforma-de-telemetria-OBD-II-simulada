@@ -114,3 +114,40 @@ para seguir em frente. Revise e ajuste quando for necessário.
    mudar. O `cycle_ms` não inclui essa verificação; todos os DTCs saem como `stored` (Modo 07 não é lido).
 8. **`elm327_tcp`.** `build_transport` levanta `NotImplementedError` até a tarefa 09. `loopback` exige uma `Ecu`.
 9. **RNF01.** Medido com `LoopbackTransport` e ECU em 10 ms fixos, relógio real, ciclo 0 (10 PIDs).
+
+## Tarefa 06 (servidor, API e banco)
+
+1. **Execução (`runs`).** A spec não diz quando criar a linha. Decisão: criada de forma preguiçosa na primeira
+   gravação, com a `source` da primeira amostra (`desconhecida` se o primeiro evento for DTC). Estatísticas
+   valem só para a execução atual; `latest`, `history`, `dtc` e `export.csv` cobrem todas as execuções.
+   `seed_*`, `profile` e `notes` existem mas ficam vazios até as tarefas do simulador e dos ensaios.
+2. **`GET /api/latest`.** A tabela diz resposta `Sample`, mas a descrição fala em "estado dos DTCs". Decisão:
+   devolve só o `Sample` (404 sem amostras); o estado dos DTCs fica em `/api/dtc`.
+3. **`GET /api/history`.** `since` filtra pelo `ts` da amostra (instante de publicação). Devolve as `limit`
+   primeiras a partir de `since`, em ordem crescente (padrão 1000, máximo 10000).
+4. **`GET /api/dtc`.** Histórico de relatórios, do mais antigo ao mais novo; o último traz os DTCs ativos.
+   Relatório sem DTCs grava uma linha com `code` NULL, que mantém o relatório reconstruível.
+5. **Colunas além da spec.** `samples` ganha `source`, `timeouts` e `invalid`; `dtc_events` ganha `report_id`,
+   `ts`, `mil`, `count` e `description`. Sem elas não é possível reconstruir `Sample` e `DtcReport` do banco.
+6. **Perdas e duplicatas.** Perda = lacunas entre o menor e o maior `seq` da execução (um servidor que começa
+   no meio de uma execução não conta o início como perda). `seq` repetido responde 202 ao coletor, não é
+   gravado e vira evento `duplicate` em `comm_events`; `received` não conta duplicatas.
+7. **Latência e taxa.** Latência = `ts_recv − ts` da amostra, em ms, com o relógio do servidor. Taxa =
+   amostras com `ts_recv` nos últimos 3 s, divididas por 3. Percentis por posto mais próximo.
+8. **Mensagens do WebSocket.** A spec não diz como distinguir amostra de DTC. Decisão: envelope
+   `{"type": "sample", "data": Sample}` ou `{"type": "dtc", "data": DtcReport}`. Ao conectar: amostras
+   com `ts >= agora − 60 s`, depois relatórios de DTC no mesmo intervalo, depois o ao vivo. A inscrição
+   acontece antes da leitura do histórico; logo, uma amostra publicada nessa janela pode chegar duas vezes.
+   O cliente deduplica por `seq`.
+9. **Fila por cliente.** `Broadcaster` usa filas sem limite. Um cliente lento acumula memória; limitar a
+   fila exigiria decidir o que fazer com quem fica para trás (desconectar ou perder mensagens).
+10. **Dashboard estático.** Montado em `/` só se `src/obd/web/dashboard/` existir, para a tarefa 07 não
+    depender desta. Montado depois das rotas, para não engolir `/api`.
+11. **Dependência.** O `sqlalchemy` async exige `greenlet`, que o `pyproject.toml` não declarava. Decisão:
+    `sqlalchemy[asyncio]>=2`.
+12. **Arquivos fora da lista.** `state.py` (estado compartilhado e `Broadcaster`) e `stats.py` (cálculo puro,
+    usado pelos dois armazenamentos) foram criados para evitar ciclo entre `routes.py` e `ws.py`.
+13. **Ponto de entrada.** `create_app(storage, clock)` recebe o armazenamento pronto (`await SqlStorage.create(url)`).
+    O caminho do arquivo SQLite e o processo que sobe o servidor ficam para `make run`, ainda não implementado.
+14. **Aviso de depreciação.** O `TestClient` do Starlette avisa que `httpx` está depreciado (sugere `httpx2`).
+    Não foi suprimido; a versão do FastAPI instalada é a que impõe esse aviso.

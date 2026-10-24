@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 
+from obd.protocol.schemas import PidValue, Sample, SampleErrors
+
 
 class FakeClock:
     """Relógio injetável em segundos, avançado manualmente."""
@@ -40,6 +42,28 @@ class FakeVehicleModel:
 
     def pids(self) -> frozenset[int]:
         return frozenset(self._values)
+
+
+def make_sample(
+    seq: int,
+    ts: float,
+    *,
+    values: Mapping[str, PidValue] | None = None,
+    cycle_ms: float = 100.0,
+    source: str = "can_virtual",
+    timeouts: int = 0,
+    invalid: int = 0,
+) -> Sample:
+    """Amostra válida do coletor (padrão: só RPM)."""
+    default = {"rpm": PidValue(pid="0x0C", value=2000.0, unit="rpm", rtt_ms=11.0)}
+    return Sample(
+        seq=seq,
+        ts=ts,
+        cycle_ms=cycle_ms,
+        source=source,
+        values=dict(default if values is None else values),
+        errors=SampleErrors(timeouts=timeouts, invalid=invalid),
+    )
 
 
 class ScriptedTransport:

@@ -12,7 +12,7 @@ dependencies = [
     "python-can",
     "fastapi",
     "uvicorn",
-    "sqlalchemy>=2",
+    "sqlalchemy[asyncio]>=2",
     "aiosqlite",
     "pydantic>=2",
     "pyyaml",
