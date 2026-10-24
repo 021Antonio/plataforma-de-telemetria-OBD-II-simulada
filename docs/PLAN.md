@@ -21,7 +21,8 @@ Gerado a partir de `tasks/*.md`. Uma tarefa por sessão. O modelo é o mais bara
 | 13 | S13 | [13 Orquestração (make run), serviços no Compose e verificação de ponta a ponta](../tasks/13-run-orquestracao.md) | sonnet | 05, 06, 07, 08, 09, 12 | nenhuma | M | o processo não sobe ou não encerra limpo após 2 iterações, ou a amostra não chega ao dashboard |
 | 14 | S14 | [14 Correções do dashboard e do painel e script de capturas de tela](../tasks/14-dashboard-correcoes.md) | sonnet | 13 | nenhuma | P | valores lentos continuam piscando ou sumindo após 2 iterações |
 | 15 | S15 | [15 Redesenho visual do dashboard e do painel do simulador](../tasks/15-dashboard-design.md) | sonnet | 14 | nenhuma | M | o resultado visual continua desorganizado ou parecido com o anterior após 2 iterações: usar opus uma vez para direção de design |
-| 16 | S16 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10, 13, 15 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
+| 16 | S16 | [16 Compatibilidade do ELM327 simulado com clientes reais (python-OBD)](../tasks/16-elm327-clientes-reais.md) | sonnet | 09, 13 | nenhuma | M | o python-OBD ainda não lê rotação, velocidade e DTCs após 2 iterações |
+| 17 | S17 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10, 13, 15, 16 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
 
 **MVP:** fim da tarefa 07 (dashboard); o MQTT (12) entra antes dele na ordem (coleta, servidor, banco e dashboard funcionando de ponta a ponta).
 

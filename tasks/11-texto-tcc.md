@@ -2,9 +2,9 @@
 id: "11"
 title: Reescrita dos capítulos do TCC com os resultados reais
 model: sonnet
-session: 16
-order: 16
-depends_on: ["10", "13", "15"]
+session: 17
+order: 17
+depends_on: ["10", "13", "15", "16"]
 parallel_with: []
 weight: M
 escalate_if: "revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez"
