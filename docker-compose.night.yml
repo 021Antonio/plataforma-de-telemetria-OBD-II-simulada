@@ -1,0 +1,19 @@
+# Executor noturno. Uso:
+#   docker compose -f docker-compose.night.yml build
+#   docker compose -f docker-compose.night.yml run --rm night claude     (login, uma vez; depois /exit)
+#   docker compose -f docker-compose.night.yml run --rm night            (roda as tarefas)
+services:
+  night:
+    build:
+      context: .
+      dockerfile: docker/night.Dockerfile
+    working_dir: /work
+    volumes:
+      - .:/work                    # o projeto; commits ficam aqui
+      - claude-home:/home/dev      # login do Claude e configurações
+    environment:
+      NIGHT_PUSH: "0"              # sem push de dentro do container
+    stdin_open: true
+    tty: true
+volumes:
+  claude-home: {}
