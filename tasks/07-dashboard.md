@@ -2,10 +2,10 @@
 id: "07"
 title: Dashboard web
 model: sonnet
-session: 8
-order: 8
+session: 9
+order: 9
 depends_on: ["06"]
-parallel_with: ["05", "08", "09"]
+parallel_with: ["05", "08", "09", "12"]
 weight: M
 escalate_if: "layout ou animação continuam errados após 2 iterações com captura de tela"
 spec: docs/spec/07-dados-web.md, docs/spec/05-api.md

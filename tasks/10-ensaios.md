@@ -1,10 +1,10 @@
 ---
 id: "10"
-title: Ensaios E1 a E6, métricas e gráficos
+title: Ensaios E1 a E7, métricas e gráficos
 model: sonnet
-session: 11
-order: 11
-depends_on: ["04", "05", "06", "09"]
+session: 12
+order: 12
+depends_on: ["04", "05", "06", "09", "12"]
 parallel_with: []
 weight: M
 escalate_if: "métricas inconsistentes entre execuções com as mesmas sementes após 2 iterações"
@@ -18,7 +18,7 @@ Automatizar os ensaios de desempenho e gerar CSV, JSON, estatísticas e gráfico
 ## Arquivos
 
 - `tests/benchmarks/runner.py`: sobe simulador, coletor e servidor em processos, aplica o cenário, junta o `true_value` da ECU ao `Sample` por `seq` e grava em `readings.true_value`.
-- `tests/benchmarks/e1.py` a `e6.py`: cenários da tabela de ensaios da spec.
+- `tests/benchmarks/e1.py` a `e7.py`: cenários da tabela de ensaios da spec. O E7 compara HTTP e MQTT (latência e perdas).
 - `tests/benchmarks/stats.py`: média, desvio padrão, mediana, p95, p99 e máximo.
 - `tests/benchmarks/plots.py`: gráficos com `matplotlib` (valores reais contra decodificados, distribuição de RTT, sensibilidade, escalabilidade).
 - Saída em `runs/<data>/` com CSV, JSON, sementes e configuração. `runs/` fica no `.gitignore`, com exceção de um exemplo versionado em `docs/ensaios/`.

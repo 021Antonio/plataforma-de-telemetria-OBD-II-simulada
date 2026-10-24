@@ -2,10 +2,10 @@
 id: "08"
 title: API de controle e painel do simulador
 model: haiku
-session: 9
-order: 9
+session: 10
+order: 10
 depends_on: ["04"]
-parallel_with: ["05", "06", "07", "09"]
+parallel_with: ["05", "06", "07", "09", "12"]
 weight: P
 escalate_if: "overrides não refletem na leitura após 2 iterações; passar para sonnet"
 spec: docs/spec/05-api.md, docs/spec/07-dados-web.md

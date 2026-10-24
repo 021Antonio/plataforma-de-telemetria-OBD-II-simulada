@@ -6,24 +6,25 @@ Gerado a partir de `tasks/*.md`. Uma tarefa por sessão. O modelo é o mais bara
 
 | Ordem | Sessão | Tarefa | Modelo | Depende de | Paralelizável com | Peso | Escalar se |
 |---|---|---|---|---|---|---|---|
-| 1 | S1 | [00 Fundação](../tasks/00-fundacao.md) | haiku | nenhuma | nenhuma | P | lint/test falham após 2 iterações |
-| 2 | S2 | [01 Protocolo base](../tasks/01-protocolo-base.md) | sonnet | 00 | nenhuma | M | fórmulas/propriedades falham após 2 iterações |
-| 3 | S3 | [02 ISO-TP](../tasks/02-isotp.md) | sonnet | 01 | nenhuma | M | remontagem falha após 2 iterações |
-| 4 | S4 | [03 Transporte e ECU](../tasks/03-transporte-ecu.md) | sonnet | 01, 02 | 06 | M | corrida/ISO-TP após 2 iterações |
-| 5 | S5 | [04 Modelo de veículo e falhas](../tasks/04-modelo-veiculo-falhas.md) | sonnet | 03 | 06 | M | não determinístico após 2 iterações |
-| 6 | S6 | [05 Coletor](../tasks/05-coletor.md) | sonnet | 03 | 06 | M | recuo/ordem intermitente |
-| 7 | S7 | [06 Servidor e banco](../tasks/06-servidor-banco.md) | haiku | 01 | 02 a 05 | M | WebSocket/seq falha: passar para sonnet |
-| 8 | S8 | [07 Dashboard](../tasks/07-dashboard.md) | sonnet | 06 | 05, 08, 09 | M | layout errado após 2 iterações |
-| 9 | S9 | [08 Painel de controle](../tasks/08-painel-controle.md) | haiku | 04 | 05 a 07, 09 | P | override falha: passar para sonnet |
-| 10 | S10 | [09 ELM327](../tasks/09-elm327.md) | sonnet | 03 | 05 a 08 | M | handshake falha após 2 iterações |
-| 11 | S11 | [10 Ensaios](../tasks/10-ensaios.md) | sonnet | 04, 05, 06, 09 | nenhuma | M | métricas inconsistentes |
-| 12 | S12 | [11 Texto do TCC](../tasks/11-texto-tcc.md) | sonnet | 10 | nenhuma | M | revisão final de coerência: opus uma vez |
+| 1 | S1 | [00 Fundação do repositório](../tasks/00-fundacao.md) | haiku | nenhuma | nenhuma | P | make test ou make lint ainda falham após 2 iterações |
+| 2 | S2 | [01 Núcleo de protocolo (PIDs, DTCs, quadros, serviços e schemas)](../tasks/01-protocolo-base.md) | sonnet | 00 | nenhuma | M | testes de propriedade ou de fórmulas seguem falhando após 2 iterações |
+| 3 | S3 | [02 ISO-TP completo e Modos 02 e 09](../tasks/02-isotp.md) | sonnet | 01 | nenhuma | M | remontagem multiquadro falha em algum comprimento após 2 iterações |
+| 4 | S4 | [03 Transporte plugável e ECU virtual](../tasks/03-transporte-ecu.md) | sonnet | 01, 02 | 06 | M | a ECU não responde corretamente ao ISO-TP ou há condição de corrida após 2 iterações |
+| 5 | S5 | [04 Modelo de veículo, perfis de condução e falhas](../tasks/04-modelo-veiculo-falhas.md) | sonnet | 03 | 06 | M | o modelo não é determinístico com as mesmas sementes após 2 iterações |
+| 6 | S6 | [05 Coletor (descoberta, plano de leitura, recuperação e publicação)](../tasks/05-coletor.md) | sonnet | 03 | 06 | M | recuo progressivo ou ordem de eventos falham de forma intermitente após 2 iterações |
+| 7 | S7 | [06 Servidor, API e banco de dados](../tasks/06-servidor-banco.md) | haiku | 01 | 02, 03, 04, 05 | M | o WebSocket ou a detecção de perda por seq falha após 2 iterações; passar para sonnet |
+| 8 | S8 | [12 MQTT (publicador, assinante e Mosquitto no Compose)](../tasks/12-mqtt.md) | sonnet | 05, 06 | 07, 08, 09 | M | o assinante perde mensagens ou duplica registros após 2 iterações |
+| 9 | S9 | [07 Dashboard web](../tasks/07-dashboard.md) | sonnet | 06 | 05, 08, 09, 12 | M | layout ou animação continuam errados após 2 iterações com captura de tela |
+| 10 | S10 | [08 API de controle e painel do simulador](../tasks/08-painel-controle.md) | haiku | 04 | 05, 06, 07, 09, 12 | P | overrides não refletem na leitura após 2 iterações; passar para sonnet |
+| 11 | S11 | [09 Camada ELM327 (servidor TCP e cliente)](../tasks/09-elm327.md) | sonnet | 03 | 05, 06, 07, 08, 12 | M | cliente de terceiros não conclui o handshake após 2 iterações |
+| 12 | S12 | [10 Ensaios E1 a E7, métricas e gráficos](../tasks/10-ensaios.md) | sonnet | 04, 05, 06, 09, 12 | nenhuma | M | métricas inconsistentes entre execuções com as mesmas sementes após 2 iterações |
+| 13 | S13 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
 
-**MVP:** fim da tarefa 07 (coleta, servidor, banco e dashboard funcionando de ponta a ponta).
+**MVP:** fim da tarefa 07 (dashboard); o MQTT (12) entra antes dele na ordem (coleta, servidor, banco e dashboard funcionando de ponta a ponta).
 
 ## Caminho crítico
 
-00, 01, 02, 03, 04 ou 05, 10, 11. As tarefas 06, 07, 08 e 09 saem do caminho crítico e podem rodar em paralelo, em sessões separadas.
+00, 01, 02, 03, 05, 12, 10, 11. As tarefas 06, 07, 08, 09 e 12 saem do caminho crítico e podem rodar em paralelo, em sessões separadas.
 
 ## Como lançar uma sessão
 

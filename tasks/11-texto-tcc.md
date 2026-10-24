@@ -2,8 +2,8 @@
 id: "11"
 title: Reescrita dos capítulos do TCC com os resultados reais
 model: sonnet
-session: 12
-order: 12
+session: 13
+order: 13
 depends_on: ["10"]
 parallel_with: []
 weight: M

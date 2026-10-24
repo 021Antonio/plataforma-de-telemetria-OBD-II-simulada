@@ -20,6 +20,7 @@
 | E4 (novo) | Perda de 0, 1, 5 e 10% dos quadros | Timeouts, recuperação, taxa efetiva |
 | E5 (novo) | VIN por ISO-TP com `STmin` de 0, 1 e 10 ms | Tempo de remontagem |
 | E6 (novo) | Cliente ELM327 comum contra o servidor TCP | Compatibilidade de comandos |
+| E7 | 2 execuções de 60 s, uma por HTTP e outra por MQTT | Latência e perdas por canal |
 
 Cada ensaio grava um CSV e um JSON em `runs/<data>/` com a configuração e as sementes. A estatística reportada é média, desvio padrão, mediana, p95, p99 e máximo. Repetir cada ensaio em uma segunda máquina, como no TCC, e declarar as diferenças.
 
