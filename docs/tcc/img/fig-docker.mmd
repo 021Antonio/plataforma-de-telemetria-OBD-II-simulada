@@ -1,0 +1,12 @@
+flowchart TB
+  subgraph Host["Computador do usuário"]
+    subgraph app["contêiner app"]
+      run["python -m obd run<br/>servidor + simulador + coletor"]
+    end
+    subgraph mq["contêiner mosquitto (perfil mqtt, opcional)"]
+      b[("Mosquitto :1883")]
+    end
+    nav["Navegador"] -->|"8000 e 8001"| run
+    cli["App OBD"] -->|"35000"| run
+    run -.->|"MQTT"| b
+  end

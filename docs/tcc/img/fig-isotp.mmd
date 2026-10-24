@@ -1,0 +1,10 @@
+sequenceDiagram
+  participant C as Coletor (testador)
+  participant E as ECU virtual
+  C->>E: 0x7DF [02 09 02 ...] (Modo 09, PID 02)
+  E-->>C: 0x7E8 FF [10 14 49 02 01 + 3 bytes do VIN]
+  C->>E: 0x7E0 FC [30 BS STmin]
+  E-->>C: 0x7E8 CF [21 + 7 bytes]
+  Note over E,C: espera STmin entre quadros
+  E-->>C: 0x7E8 CF [22 + 7 bytes]
+  Note over C: remonta 20 bytes (49 02 01 + VIN de 17)
