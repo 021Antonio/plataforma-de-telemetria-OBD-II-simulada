@@ -1,0 +1,24 @@
+# Configuração padrão. Valores de transporte, PIDs, taxas e portas.
+
+portas:
+  servidor: 8000      # FastAPI: REST, WebSocket e dashboard
+  painel: 8001        # rotas do painel de controle do simulador
+  elm327_tcp: 35000   # servidor TCP compatível com ELM327
+
+can:
+  transporte: virtual # virtual | socketcan | slcan | elm327_tcp
+  taxa_bps: 500000    # taxa CAN padrão do OBD-II (ISO 15765-4)
+
+coleta:
+  intervalo_ms: 100   # período base do laço de aquisição
+
+# PIDs do modo 01 monitorados por padrão (código hexadecimal).
+pids:
+  - 0x04   # carga do motor
+  - 0x05   # temperatura do líquido de arrefecimento
+  - 0x0B   # pressão do coletor de admissão
+  - 0x0C   # rotação do motor (RPM)
+  - 0x0D   # velocidade do veículo
+  - 0x0F   # temperatura do ar de admissão
+  - 0x11   # posição do acelerador
+  - 0x2F   # nível de combustível
