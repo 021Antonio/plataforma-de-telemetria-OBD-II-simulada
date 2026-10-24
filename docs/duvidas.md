@@ -285,3 +285,23 @@ para seguir em frente. Revise e ajuste quando for necessário.
    um teste falha se o arquivo ficar defasado.
 5. **Divergências encontradas na spec 04.** A linha `ATSP6`/`ATSP0` diz só "CAN 11 bits"; o
    código também aceita `ATSPA6` e `ATTP`, e `ATDP` muda com o modo (AUTO). Documentado na 09.
+
+## Tarefa 18 (coletor com adaptador real)
+
+1. **Como o coletor sabe o erro do chip.** O contrato `Transport.request` continua devolvendo
+   `None`. O `Elm327TcpTransport` expõe `last_error` (`CAN ERROR`, `NO DATA`, `?`,
+   `conexão perdida`...), lido com `getattr` pelo coletor; transportes sem o atributo seguem
+   gerando `timeout`. Erro do chip vira evento `adapter_error`, conta em `errors.invalid` e
+   não grava valor. Estouro de tempo continua `timeout`.
+2. **`NO DATA` no modo 03** (sem DTCs, conforme spec 04) é lido como lista vazia, não como falha.
+3. **Resposta atrasada.** Após estouro de tempo, o transporte descarta a resposta atrasada
+   (até o próximo `>`) antes do comando seguinte; sem isso ela seria tomada como a do PID seguinte.
+4. **Reconexão.** Só o transporte reconecta (reenvia `ATZ`, `ATE0`, `ATL0`, `ATS0`, `ATH0`, `ATSP0`);
+   a consulta em que a queda foi notada falha, a seguinte reconecta. Recuo: 1ª tentativa
+   imediata, depois 200 ms dobrando até 5 s (parâmetros do construtor, fora do YAML).
+   `seq` é do coletor e não depende do soquete.
+5. **Padrões do YAML.** `coletor.timeout_ms` passou de 100 para 500 (Wi-Fi) e entrou
+   `coletor.timeout_busca_s: 5.0` (só a 1ª consulta após conectar).
+6. **Injeção no servidor.** `ErrorInjection` (`errors`, `extra_delay_ms`, `drop_connection_after(n)`,
+   `record`/`seen`), desligada por padrão. `errors` vale só para comandos OBD; a queda é única
+   e ocorre após responder o N-ésimo comando.

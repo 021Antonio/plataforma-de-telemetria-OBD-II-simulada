@@ -46,7 +46,8 @@ mqtt:
 coletor:
   transporte: loopback  # can_virtual | loopback | elm327_tcp
   intervalo_ms: 100     # período alvo do ciclo de leitura
-  timeout_ms: 100       # espera por resposta de cada PID
+  timeout_ms: 500       # espera por resposta de cada PID (compatível com adaptador Wi-Fi)
+  timeout_busca_s: 5.0  # só a primeira consulta (SEARCHING...) de um adaptador ELM327 real
   dtc_intervalo_s: 2.0  # período de leitura do PID 0x01 (e do Modo 03 se mudar)
   recuo:                # recuo progressivo após falhas seguidas
     limiar: 3           # falhas seguidas que ativam o recuo

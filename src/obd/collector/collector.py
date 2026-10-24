@@ -29,7 +29,7 @@ Sleep = Callable[[float], Awaitable[None]]
 @dataclass(frozen=True)
 class CollectorEvent:
     ts: float
-    kind: str  # timeout | invalid | backoff | publish_failed | discovery_failed
+    kind: str  # timeout | invalid | adapter_error | backoff | publish_failed | discovery_failed
     detail: str
 
 
@@ -166,7 +166,12 @@ class Collector:
         raw = await self._transport.request(req, timeout_ms=self._timeout_ms)
         self._last_rtt_ms = (self._clock() - start) * 1000
         if raw is None:
-            self._fail("timeout", req.hex())
+            # transportes de adaptador real informam o erro do chip em `last_error`
+            error = getattr(self._transport, "last_error", None)
+            if error:
+                self._fail("adapter_error", f"{req.hex()}: {error}")
+            else:
+                self._fail("timeout", req.hex())
             return None
         try:
             resp = parse_response(raw, req)
@@ -201,19 +206,25 @@ class Collector:
         if status == self._last_status:
             return
         raw = await self._transport.request(build_request(MODE_STORED_DTC), self._timeout_ms)
+        codes: list[str] = []
         if raw is None:
-            self._fail("timeout", "03")
-            return
-        try:
-            resp = parse_response(raw, build_request(MODE_STORED_DTC))
-        except ProtocolError as exc:
-            self._fail("invalid", f"03: {exc}")
-            return
+            error = getattr(self._transport, "last_error", None)
+            if error != "NO DATA":  # sem DTCs, o adaptador real responde NO DATA ao modo 03
+                self._fail(
+                    "adapter_error" if error else "timeout", f"03: {error}" if error else "03"
+                )
+                return
+        else:
+            try:
+                codes = list(parse_response(raw, build_request(MODE_STORED_DTC)).dtcs)
+            except ProtocolError as exc:
+                self._fail("invalid", f"03: {exc}")
+                return
         self._last_status = status
         report = DtcReport(
             ts=self._wall(),
             mil=status.mil,
-            count=len(resp.dtcs),
-            codes=[DtcEntry(code=c, description=dtc.describe(c)) for c in resp.dtcs],
+            count=len(codes),
+            codes=[DtcEntry(code=c, description=dtc.describe(c)) for c in codes],
         )
         await self._publish(self._publisher.publish_dtcs(report))

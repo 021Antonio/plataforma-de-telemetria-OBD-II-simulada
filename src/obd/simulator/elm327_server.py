@@ -10,6 +10,7 @@ import asyncio
 import contextlib
 import os
 import re
+from dataclasses import dataclass, field
 
 from obd.protocol.isotp import segment
 from obd.protocol.pids import PIDS
@@ -29,6 +30,26 @@ _AT_FLAGS = {"E": "echo", "L": "linefeed", "S": "spaces", "H": "headers"}
 # Aceitos com `OK` e sem efeito (ajustes que os apps mandam e que o simulador não precisa).
 _AT_ACCEPTED = ("AT", "ST", "SH", "CAF", "CRA", "AL", "D", "M", "R", "PC", "JHF", "JS", "FE", "SW",
                 "WM", "CF", "CM", "CS", "V", "KW", "IB", "BI", "SS", "CV")  # fmt: skip
+
+
+@dataclass
+class ErrorInjection:
+    """Falhas de um adaptador real, para testar o coletor. Tudo desligado por padrão.
+
+    `errors` são respostas cruas devolvidas, uma por requisição OBD (não AT), antes de voltar
+    ao normal; `extra_delay_ms` atrasa cada resposta OBD; `drop_after` fecha a conexão depois
+    de responder esse número de comandos (uma vez só). `record` guarda os comandos em `seen`."""
+
+    errors: list[str] = field(default_factory=list)
+    extra_delay_ms: int = 0
+    drop_after: int | None = None
+    record: bool = False
+    seen: list[str] = field(default_factory=list)
+    _count: int = 0
+
+    def drop_connection_after(self, commands: int) -> None:
+        self.drop_after = commands
+        self._count = 0
 
 
 class _Session:
@@ -54,7 +75,9 @@ class Elm327Server:
         host: str = "127.0.0.1",
         port: int = PORT,
         timeout_ms: int = 200,
+        inject: ErrorInjection | None = None,
     ) -> None:
+        self.inject = inject or ErrorInjection()
         self._backend = backend
         self._host = host
         self._port = port
@@ -94,6 +117,8 @@ class Elm327Server:
                     if raw.strip():
                         writer.write(await self._answer(session, raw.decode("latin-1")))
                         await writer.drain()
+                        if self._should_drop(raw.decode("latin-1")):
+                            return
         except (ConnectionError, asyncio.IncompleteReadError):
             pass
         finally:
@@ -101,6 +126,18 @@ class Elm327Server:
             writer.close()
             with contextlib.suppress(ConnectionError):
                 await writer.wait_closed()
+
+    def _should_drop(self, line: str) -> bool:
+        inj = self.inject
+        if inj.record:
+            inj.seen.append(line.replace(" ", "").upper())
+        if inj.drop_after is None:
+            return False
+        inj._count += 1
+        if inj._count < inj.drop_after:
+            return False
+        inj.drop_after = None
+        return True
 
     async def _answer(self, s: _Session, line: str) -> bytes:
         eol = "\r\n" if s.linefeed else "\r"
@@ -122,6 +159,10 @@ class Elm327Server:
         if not _HEX.fullmatch(cmd) or len(cmd) % 2 or not 1 <= len(cmd) // 2 <= MAX_REQUEST:
             return ["?"]
         payload = bytes.fromhex(cmd)
+        if self.inject.extra_delay_ms:
+            await asyncio.sleep(self.inject.extra_delay_ms / 1000)
+        if self.inject.errors:
+            return [self.inject.errors.pop(0)]
         prefix = []
         if cmd == "0100" and not s.searched:
             prefix = ["SEARCHING..."]
