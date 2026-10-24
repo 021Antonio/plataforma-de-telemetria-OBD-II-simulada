@@ -79,7 +79,7 @@ O desenvolvimento seguiu um fluxo em quatro passos, descritos em detalhe no Cap�
 3. **Ensaios.** Sete ensaios (E1 a E7) medem exatidão, desempenho e robustez; cada um grava configuração, sementes, máquina e resultados em arquivos CSV e JSON.
 4. **Validação externa.** A camada ELM327 foi exercitada por bibliotecas e aplicativos de terceiros (python-OBD e OBD Auto Doctor).
 
-Todas as medições deste texto vêm de um único computador, descrito na Seção 4.10. Não há segunda máquina medida, e o trabalho declara essa limitação em vez de supor reprodutibilidade entre máquinas. A repetição por outra pessoa é possível e está documentada (Apêndice B), mas não foi executada.
+Todas as medições deste texto vêm de um único computador, descrito na Seção 4.10. Não há segunda máquina medida, e o trabalho declara essa limitação em vez de supor reprodutibilidade entre máquinas. Uma repetição dos ensaios E1 a E3 em contêiner Docker isolado, no mesmo computador, foi feita e está na Seção 5.9; a repetição por outra pessoa, em outra máquina, está documentada (Apêndice B), mas não foi executada.
 
 ## ESTRUTURA DO TRABALHO
 

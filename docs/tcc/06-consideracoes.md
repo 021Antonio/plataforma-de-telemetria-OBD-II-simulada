@@ -27,7 +27,7 @@ As limitações abaixo delimitam o que os resultados permitem afirmar.
 
 - **Nenhum veículo real foi usado.** Todos os resultados valem para o simulador e para a plataforma que o cerca. O trabalho não afirma nada sobre o comportamento de um veículo, de uma ECU real ou de um adaptador físico.
 - **Barramento virtual.** Os ensaios usam o laço local, sem camada física CAN. Não há medida de taxa de bits, terminação, arbitragem ou erros de bit.
-- **Uma única máquina.** Os tempos vêm de uma única execução de cada ensaio em um computador, sem repetições independentes. Os desvios padrão são internos a cada execução, e a variação entre execuções e entre máquinas não foi estimada.
+- **Uma única máquina.** Os tempos vêm de um computador. Os ensaios E1 a E3 foram repetidos uma vez em contêiner isolado, na mesma máquina, com resultados muito próximos, mas essa repetição não é independente e não permite estimar a variação estatística; a variação entre máquinas não foi estimada.
 - **ECU e veículo são modelos.** O atraso da ECU é uniforme e o modelo do veículo é ilustrativo e não calibrado. A norma foi interpretada pelos autores e validada contra dois clientes de terceiros, o que reduz, mas não elimina, o risco de divergência em relação a outros clientes e a uma ECU real.
 - **Validação de aplicativos de celular.** Car Scanner e Torque não foram testados. O OBD Auto Doctor foi observado manualmente em uma sessão, sem medida estatística.
 - **Segurança.** O sistema não usa TLS nem autenticação. A API de controle do simulador deve ser exposta apenas em rede local de confiança.

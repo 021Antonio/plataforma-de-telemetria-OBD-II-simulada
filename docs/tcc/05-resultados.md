@@ -313,16 +313,42 @@ Um arquivo anterior do E7 (`docs/ensaios/e7.json`) foi gerado sem *broker* real,
 
 **Reprodutibilidade determinística.** Com as mesmas sementes e o mesmo perfil, a sequência de valores físicos do simulador é idêntica, e portanto os valores reais, os valores decodificados e os erros de decodificação coincidem entre execuções. Esse resultado é consequência do projeto (sementes explícitas, relógio injetável e passos fixos de 10 ms) e é verificado pelos testes do modelo de veículo.
 
-**Reprodutibilidade de tempos.** Ciclo, RTT e latência dependem de relógio real, do sistema operacional e da CPU, e não são reproduzidos bit a bit. Os números deste capítulo vêm de uma única execução de cada ensaio em uma única máquina (contêiner Linux sobre WSL2, 32 núcleos lógicos, Python 3.12.15). Como não há repetições independentes, não há como estimar a variação entre execuções; os desvios padrão reportados são dentro de uma execução. A repetição em uma segunda máquina, prevista no requisito RNF05, não foi feita e é um trabalho pendente (Apêndice B).
+**Reprodutibilidade de tempos.** Ciclo, RTT e latência dependem de relógio real, do sistema operacional e da CPU, e não são reproduzidos bit a bit. Os números das seções anteriores vêm de uma execução de cada ensaio em um computador (contêiner Linux sobre WSL2, 32 núcleos lógicos, Python 3.12.15). Para ter uma noção da variação entre execuções, os autores repetiram os ensaios E1, E2 e E3 em um novo contêiner Docker (imagem de desenvolvimento do projeto, dependências instaladas no início da execução), no mesmo computador, com os mesmos parâmetros e sementes. A Tabela 26 compara as duas execuções.
+
+::: {custom-style="LegendaTabela"}
+Tabela 26: Execução original e repetição em contêiner isolado (E1 a E3, mesma máquina)
+:::
+
+| Medida | Original | Repetição |
+| --- | --- | --- |
+| E1: ciclo p95 (ms) | 115,6 | 115,8 |
+| E1: RTT p95 (ms) | 13,5 | 13,5 |
+| E1: latência coletor ao banco p95 (ms) | 3,5 | 3,8 |
+| E1: detecção da P0300 (s) | 0,79 | 1,71 |
+| E2: ciclo p95 com atraso de 0 ms (ms) | 0,7 | 0,8 |
+| E2: ciclo p95 com atraso de 10 ms (ms) | 105,8 | 104,0 |
+| E2: ciclo p95 com atraso de 25 ms (ms) | 259,5 | 259,3 |
+| E2: ciclo p95 com atraso de 50 ms (ms) | 508,2 | 508,6 |
+| E3: ciclo p95 com 1 PID (ms) | 13,6 | 13,7 |
+| E3: ciclo p95 com 3 PIDs (ms) | 37,3 | 37,3 |
+| E3: ciclo p95 com 5 PIDs (ms) | 59,7 | 59,8 |
+| E3: ciclo p95 com 10 PIDs (ms) | 116,9 | 116,7 |
+| Perdas, duplicações, timeouts e leituras com erro acima de r/2 (todos os casos) | 0 | 0 |
+
+::: {custom-style="Fonte"}
+Fonte: tabelas anteriores deste capítulo e saída de terminal da repetição, feita pelos autores em 24/10/2026 (comando do Apêndice B; arquivos em `runs/repeticao/`, não versionados).
+:::
+
+Os tempos de ciclo, RTT e latência ficaram muito próximos (diferenças de até 0,3 ms na latência e de até 1,8 ms no ciclo de 10 ms de atraso), e todos os requisitos continuaram atendidos, com erro de decodificação, perdas, duplicações e *timeouts* iguais a zero. A única medida que mudou de modo visível foi o tempo de detecção da P0300, de 0,79 s para 1,71 s. Isso é esperado: o instante em que a falha é agendada é o mesmo, mas o relógio de parede e a fase do período de 2 s da consulta ao PID `0x01` variam de uma execução para outra, e o atraso de detecção cai em qualquer ponto entre perto de zero e 2 s. Ambos os valores estão dentro desse intervalo. A repetição não é independente (ver a Seção 4.10), e uma segunda máquina, prevista no requisito RNF05, continua pendente (Apêndice B). Cada ensaio, nas duas execuções, é uma única amostra de tempo, de modo que não foi calculada uma variação estatística entre execuções.
 
 **Ameaças à validade.** As principais são: (i) a ECU simulada é um modelo, e o que ela responde é o que os autores entenderam da norma; a validação com python-OBD e OBD Auto Doctor reduz esse risco, mas não o elimina; (ii) o barramento CAN não é reproduzido fisicamente, e os ensaios usam o laço local, sem custo de barramento; (iii) os tempos de relógio real foram medidos com outras tarefas rodando no mesmo computador, sem isolamento de CPU; (iv) o atraso da ECU é uma variável aleatória simples (uniforme), enquanto uma ECU real tem distribuição própria; (v) o modelo de veículo é ilustrativo, e as variáveis são coerentes entre si, mas não calibradas contra dados reais.
 
 ## ATENDIMENTO AOS REQUISITOS
 
-A Tabela 26 resume a situação de cada requisito e a evidência.
+A Tabela 27 resume a situação de cada requisito e a evidência.
 
 ::: {custom-style="LegendaTabela"}
-Tabela 26: Atendimento aos requisitos
+Tabela 27: Atendimento aos requisitos
 :::
 
 | Requisito | Situação | Evidência |

@@ -1,9 +1,9 @@
 # APÊNDICE A: ORIGEM DOS NÚMEROS
 
-Cada número reportado neste trabalho tem uma fonte rastreável no repositório. A Tabela 27 relaciona os números principais, o arquivo de origem e a forma de obtê-los. Números não listados aqui são derivações aritméticas simples dos listados (por exemplo, percentuais e razões), ou vêm de tabelas copiadas diretamente do arquivo citado na legenda.
+Cada número reportado neste trabalho tem uma fonte rastreável no repositório. A Tabela 28 relaciona os números principais, o arquivo de origem e a forma de obtê-los. Números não listados aqui são derivações aritméticas simples dos listados (por exemplo, percentuais e razões), ou vêm de tabelas copiadas diretamente do arquivo citado na legenda.
 
 ::: {custom-style="LegendaTabela"}
-Tabela 27: Origem dos números do Capítulo 5
+Tabela 28: Origem dos números do Capítulo 5
 :::
 
 | Número | Valor | Fonte | Como obtido |
@@ -23,6 +23,7 @@ Tabela 27: Origem dos números do Capítulo 5
 | E5 (remontagem do VIN) | Tabela 24 | `docs/ensaios/e5.json` | campo `remontagem_ms` |
 | E6 (19 comandos) | 19 de 19 | `docs/ensaios/e6.json` | execução do cliente de soquete cru |
 | E7 (HTTP e MQTT) | Tabela 25 | `docs/ensaios/e7_mosquitto.json` | campos `latencia_ms`, `ciclos` e `ciclos_por_s` |
+| Repetição em contêiner (E1 a E3) | Tabela 26 | saída de terminal dos autores (`runs/repeticao/`, não versionado) | comando do Apêndice B, em 24/10/2026 |
 | Máquina de medição | Linux sobre WSL2, Python 3.12.15, 32 núcleos lógicos | campo `maquina` de cada JSON | registrado pelo executor de ensaios |
 | Linhas de código por módulo | Tabela 7 | `src/obd/` | contagem de linhas dos arquivos de cada pasta, em 24/10/2026 |
 | python-OBD 0.7.3 e OBD Auto Doctor | descrição qualitativa | `docs/ensaios.md` (seção "Cliente real"), `docs/duvidas.md` (tarefa 09) e observação dos autores | teste `test_elm327_python_obd.py` e sessão manual |
@@ -69,7 +70,15 @@ Cada ensaio grava, em `runs/<data>/`, um CSV com uma linha por leitura (com `tru
 
 ## Repetição em outra máquina
 
-Para uma comparação entre máquinas, conforme o RNF05: instalar o Python 3.12 ou superior e as dependências, fechar programas que consumam CPU (os tempos são de relógio real), rodar os ensaios E1 a E7 com `--out runs/maquina2`, e comparar os JSON das duas máquinas (campo `maquina`). Valores reais e erros de decodificação dependem só das sementes e devem coincidir; ciclo, RTT e latência dependem do sistema operacional e da CPU, e as diferenças devem ser declaradas. Essa comparação não foi realizada neste trabalho.
+Para uma comparação entre máquinas, conforme o RNF05: instalar o Python 3.12 ou superior e as dependências, fechar programas que consumam CPU (os tempos são de relógio real), rodar os ensaios E1 a E7 com `--out runs/maquina2`, e comparar os JSON das duas máquinas (campo `maquina`). Para repetir em contêiner isolado, na mesma máquina (foi o que se fez para E1 a E3):
+
+```bash
+export MSYS_NO_PATHCONV=1   # só no Git Bash do Windows
+docker run --rm -v "$(pwd -W):/work" -w /work plataforma-de-telemetria-obd-ii-simulada-night \
+  sh -c 'pip install -e ".[dev]" -q && python -m tests.benchmarks.e1 --out runs/repeticao && python -m tests.benchmarks.e2 --out runs/repeticao && python -m tests.benchmarks.e3 --out runs/repeticao'
+```
+
+O nome da imagem é o da imagem de desenvolvimento construída pelo `docker-compose.night.yml`. Valores reais e erros de decodificação dependem só das sementes e devem coincidir; ciclo, RTT e latência dependem do sistema operacional e da CPU, e as diferenças devem ser declaradas. A comparação com uma segunda máquina não foi realizada neste trabalho.
 
 ## Validação com cliente real
 
@@ -81,10 +90,10 @@ O teste cria um ambiente virtual temporário, instala o python-OBD nele (nunca n
 
 # APÊNDICE C: SESSÃO ELM327 COM O SIMULADOR
 
-A Tabela 28 mostra uma sessão real, capturada em 24/10/2026 contra o servidor ELM327 do simulador (`python -m obd run`), por um cliente de soquete cru. Cada linha traz o comando enviado e a resposta, com `\r` representando o retorno de carro. A rotação da consulta `010C` é (12 · 256 + 98)/4 = 792,5 rpm, compatível com a marcha lenta do perfil urbano (800 rpm). O VIN devolvido pelo `0902` é um valor fixo do simulador, sem relação com um veículo real.
+A Tabela 29 mostra uma sessão real, capturada em 24/10/2026 contra o servidor ELM327 do simulador (`python -m obd run`), por um cliente de soquete cru. Cada linha traz o comando enviado e a resposta, com `\r` representando o retorno de carro. A rotação da consulta `010C` é (12 · 256 + 98)/4 = 792,5 rpm, compatível com a marcha lenta do perfil urbano (800 rpm). O VIN devolvido pelo `0902` é um valor fixo do simulador, sem relação com um veículo real.
 
 ::: {custom-style="LegendaTabela"}
-Tabela 28: Sessão ELM327 capturada contra o simulador
+Tabela 29: Sessão ELM327 capturada contra o simulador
 :::
 
 | Comando | Resposta | Comentário |
@@ -113,10 +122,10 @@ Cada resposta termina com `\r\r>`. Para comparação, a troca observada antes da
 
 # APÊNDICE D: DECISÕES DE PROJETO REGISTRADAS
 
-A especificação deixou pontos em aberto, e cada decisão foi registrada em `docs/duvidas.md`, tarefa por tarefa. A Tabela 29 seleciona as que mais afetam os resultados ou a interpretação deles.
+A especificação deixou pontos em aberto, e cada decisão foi registrada em `docs/duvidas.md`, tarefa por tarefa. A Tabela 30 seleciona as que mais afetam os resultados ou a interpretação deles.
 
 ::: {custom-style="LegendaTabela"}
-Tabela 29: Decisões de projeto selecionadas
+Tabela 30: Decisões de projeto selecionadas
 :::
 
 | Tarefa | Decisão | Motivo |
