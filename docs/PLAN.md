@@ -19,7 +19,9 @@ Gerado a partir de `tasks/*.md`. Uma tarefa por sessão. O modelo é o mais bara
 | 11 | S11 | [09 Camada ELM327 (servidor TCP e cliente)](../tasks/09-elm327.md) | sonnet | 03 | 05, 06, 07, 08, 12 | M | cliente de terceiros não conclui o handshake após 2 iterações |
 | 12 | S12 | [10 Ensaios E1 a E7, métricas e gráficos](../tasks/10-ensaios.md) | sonnet | 04, 05, 06, 09, 12 | nenhuma | M | métricas inconsistentes entre execuções com as mesmas sementes após 2 iterações |
 | 13 | S13 | [13 Orquestração (make run), serviços no Compose e verificação de ponta a ponta](../tasks/13-run-orquestracao.md) | sonnet | 05, 06, 07, 08, 09, 12 | nenhuma | M | o processo não sobe ou não encerra limpo após 2 iterações, ou a amostra não chega ao dashboard |
-| 14 | S14 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10, 13 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
+| 14 | S14 | [14 Correções do dashboard e do painel e script de capturas de tela](../tasks/14-dashboard-correcoes.md) | sonnet | 13 | nenhuma | P | valores lentos continuam piscando ou sumindo após 2 iterações |
+| 15 | S15 | [15 Redesenho visual do dashboard e do painel do simulador](../tasks/15-dashboard-design.md) | sonnet | 14 | nenhuma | M | o resultado visual continua desorganizado ou parecido com o anterior após 2 iterações: usar opus uma vez para direção de design |
+| 16 | S16 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10, 13, 15 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
 
 **MVP:** fim da tarefa 07 (dashboard); o MQTT (12) entra antes dele na ordem (coleta, servidor, banco e dashboard funcionando de ponta a ponta).
 
