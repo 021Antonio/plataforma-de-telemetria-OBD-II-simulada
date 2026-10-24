@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "obd-telemetry"
+version = "0.1.0"
+description = "Plataforma de telemetria OBD-II simulada (software-in-the-loop)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "python-can",
+    "fastapi",
+    "uvicorn",
+    "sqlalchemy>=2",
+    "aiosqlite",
+    "pydantic>=2",
+    "pyyaml",
+    "httpx",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+    "pytest-cov",
+    "hypothesis",
+    "ruff",
+    "mypy",
+    "pandas",
+    "matplotlib",
+    "types-PyYAML",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["obd"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "tests"]
+mypy_path = "src"
