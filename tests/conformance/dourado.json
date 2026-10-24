@@ -1,0 +1,166 @@
+[
+ {
+  "comando": "ATZ",
+  "resposta": "ELM327 v1.5\r\r>"
+ },
+ {
+  "comando": "ATE0",
+  "resposta": "ATE0\rOK\r\r>"
+ },
+ {
+  "comando": "ATL0",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATS1",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATH0",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATSP0",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATDP",
+  "resposta": "AUTO, ISO 15765-4 (CAN 11/500)\r\r>"
+ },
+ {
+  "comando": "ATRV",
+  "resposta": "14.0V\r\r>"
+ },
+ {
+  "comando": "0100",
+  "resposta": "SEARCHING...\r41 00 9C 3A 80 01\r\r>"
+ },
+ {
+  "comando": "0120",
+  "resposta": "41 20 00 02 00 01\r\r>"
+ },
+ {
+  "comando": "010C",
+  "resposta": "41 0C 30 DE\r\r>"
+ },
+ {
+  "comando": "010D",
+  "resposta": "41 0D 4D\r\r>"
+ },
+ {
+  "comando": "0105",
+  "resposta": "41 05 80\r\r>"
+ },
+ {
+  "comando": "0111",
+  "resposta": "41 11 2F\r\r>"
+ },
+ {
+  "comando": "0101",
+  "resposta": "41 01 00 00 00 00\r\r>"
+ },
+ {
+  "comando": "03",
+  "resposta": "NO DATA\r\r>"
+ },
+ {
+  "comando": "0902",
+  "resposta": "49 02 01 39 42 57 5A 5A 5A 33 37 37 56 54 30 30 34 32 35 31\r\r>"
+ },
+ {
+  "comando": "01FF",
+  "resposta": "NO DATA\r\r>"
+ },
+ {
+  "comando": "XYZ",
+  "resposta": "?\r\r>"
+ },
+ {
+  "comando": "0100",
+  "resposta": "41 00 9C 3A 80 01\r\r>"
+ },
+ {
+  "comando": "ATDPN",
+  "resposta": "A6\r\r>"
+ },
+ {
+  "comando": "0900",
+  "resposta": "49 00 40 00 00 00\r\r>"
+ },
+ {
+  "comando": "0600",
+  "resposta": "NO DATA\r\r>"
+ },
+ {
+  "comando": "ATH1",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "010C",
+  "resposta": "7E8 04 41 0C 30 DE\r\r>"
+ },
+ {
+  "comando": "0900",
+  "resposta": "7E8 06 49 00 40 00 00 00\r\r>"
+ },
+ {
+  "comando": "0902",
+  "resposta": "7E8 10 14 49 02 01 39 42 57\r7E8 21 5A 5A 5A 33 37 37 56\r7E8 22 54 30 30 34 32 35 31\r\r>"
+ },
+ {
+  "comando": "ATH0",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATS0",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "010C",
+  "resposta": "410C30DE\r\r>"
+ },
+ {
+  "comando": "0902",
+  "resposta": "4902013942575A5A5A3337375654303034323531\r\r>"
+ },
+ {
+  "comando": "ATS1",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATL1",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "010C",
+  "resposta": "41 0C 30 DE\r\n\r\n>"
+ },
+ {
+  "comando": "ATL0",
+  "resposta": "OK\r\n\r\n>"
+ },
+ {
+  "comando": "ATE1",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "010C",
+  "resposta": "010C\r41 0C 30 DE\r\r>"
+ },
+ {
+  "comando": "ATE0",
+  "resposta": "ATE0\rOK\r\r>"
+ },
+ {
+  "comando": "ATSP6",
+  "resposta": "OK\r\r>"
+ },
+ {
+  "comando": "ATDPN",
+  "resposta": "6\r\r>"
+ },
+ {
+  "comando": "ATDP",
+  "resposta": "ISO 15765-4 (CAN 11/500)\r\r>"
+ }
+]
