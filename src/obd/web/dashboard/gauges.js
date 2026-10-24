@@ -43,6 +43,22 @@ function connState(wsOpen, now, lastSampleAt, staleS = 3) {
   return "connected";
 }
 
-const api = { needleAngle, mapRelativeBar, zoneColor, pushWindow, rateHz, connState, clamp };
+// Guarda o último valor de cada PID: a amostra só traz os lidos naquele ciclo. Não altera `latest`.
+function mergeSample(latest, values, now) {
+  const next = Object.assign({}, latest);
+  for (const [name, v] of Object.entries(values)) {
+    next[name] = { value: v.value, unit: v.unit, at: now };
+  }
+  return next;
+}
+
+// "missing" só se nunca chegou; "stale" quando passou de `staleS` sem atualização.
+function freshness(latest, name, now, staleS = 5) {
+  const e = latest[name];
+  if (e === undefined) return "missing";
+  return now - e.at > staleS ? "stale" : "fresh";
+}
+
+const api = { mergeSample, freshness, needleAngle, mapRelativeBar, zoneColor, pushWindow, rateHz, connState, clamp };
 if (typeof module !== "undefined") module.exports = api;
 else window.Gauges = api;

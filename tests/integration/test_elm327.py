@@ -128,7 +128,7 @@ async def test_collector_via_elm327_matches_can_accuracy(
     await col.run_cycle()
     await col.close()
     s = pub.samples[0]
-    planned = {pid: v for pid, v in VALUES.items() if pid != 0x06}  # 0x06 fora do plano padrão
+    planned = dict(VALUES)
     assert s.source == "elm327_tcp" and len(s.values) == len(planned)
     for pid, value in planned.items():
         d = get_pid(pid)

@@ -17,6 +17,7 @@ from obd.transport.base import Transport
 VALUES = {
     0x04: 42.0,
     0x05: 88.0,
+    0x06: 0.0,
     0x0B: 33.0,
     0x0C: 3127.5,
     0x0D: 77.0,

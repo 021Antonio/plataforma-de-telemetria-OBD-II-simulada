@@ -6,7 +6,7 @@ portas:
   elm327_tcp: 35000   # servidor TCP compatível com ELM327
 
 can:
-  transporte: virtual # virtual | socketcan | slcan | elm327_tcp
+  transporte: loopback # deve coincidir com coletor.transporte (o `run` usa esse); outros: can_virtual | elm327_tcp
   taxa_bps: 500000    # taxa CAN padrão do OBD-II (ISO 15765-4)
 
 coleta:
@@ -16,12 +16,14 @@ coleta:
 pids:
   - 0x04   # carga do motor
   - 0x05   # temperatura do líquido de arrefecimento
+  - 0x06   # ajuste de mistura de curto prazo
   - 0x0B   # pressão do coletor de admissão
   - 0x0C   # rotação do motor (RPM)
   - 0x0D   # velocidade do veículo
   - 0x0F   # temperatura do ar de admissão
   - 0x11   # posição do acelerador
   - 0x2F   # nível de combustível
+  - 0x42   # tensão do módulo de controle
 
 # Modelo de veículo simulado (compacto 1.6 aspirado; valores ilustrativos).
 veiculo:
@@ -61,3 +63,4 @@ coletor:
     0x0F: {a_cada: 5, prioridade: 6}   # ar de admissão (lento)
     0x2F: {a_cada: 5, prioridade: 7}   # combustível (lento)
     0x42: {a_cada: 5, prioridade: 8}   # tensão (lento)
+    0x06: {a_cada: 5, prioridade: 9}   # ajuste de mistura (lento)

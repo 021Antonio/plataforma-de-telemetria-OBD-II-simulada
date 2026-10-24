@@ -32,6 +32,7 @@ dev = [
     "pandas",
     "matplotlib",
     "types-PyYAML",
+    "playwright",
 ]
 
 [tool.setuptools.packages.find]

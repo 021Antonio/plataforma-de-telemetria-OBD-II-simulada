@@ -108,10 +108,14 @@ function atualizarControles(estado) {
 
 function mostrarQuadros(quadros) {
   const monitor = $("quadros");
-  const linhas = quadros.map((q) => `${q.sentido} ${q.id.padEnd(4)} ${q.dados}`);
-  const atual = monitor.textContent ? monitor.textContent.split("\n") : [];
-  const todas = [...atual, ...linhas].slice(-MONITOR_LINHAS_MAX);
-  monitor.textContent = todas.join("\n");
+  // "->" é requisição (entrada na ECU); "<-" é resposta (saída da ECU).
+  for (const q of quadros) {
+    const span = document.createElement("span");
+    span.className = "linha-quadro " + (q.sentido === "->" ? "entrada" : "saida");
+    span.textContent = `${q.sentido} ${q.id.padEnd(4)} ${q.dados}\n`;
+    monitor.appendChild(span);
+  }
+  while (monitor.childElementCount > MONITOR_LINHAS_MAX) monitor.firstElementChild.remove();
   monitor.scrollTop = monitor.scrollHeight;
 }
 
@@ -120,6 +124,7 @@ function conectarStream() {
   const ws = new WebSocket(`${protocolo}://${location.host}/sim/stream`);
   ws.onopen = () => {
     $("status").textContent = "conectado";
+    $("status").classList.add("ok");
   };
   ws.onmessage = (evento) => {
     const msg = JSON.parse(evento.data);
@@ -129,6 +134,7 @@ function conectarStream() {
   };
   ws.onclose = () => {
     $("status").textContent = "desconectado, tentando de novo…";
+    $("status").classList.remove("ok");
     setTimeout(conectarStream, 1000);
   };
 }
