@@ -56,3 +56,9 @@ python -m tests.conformance --host 127.0.0.1 --port 35100
 ```
 
 Contra o ESP32 em modo de bancada, a mesma suíte com `--host 192.168.0.10 --port 35000`.
+
+## Guias passo a passo
+
+- [`manual-montagem.md`](manual-montagem.md): lista de compras, montagem, gravação, testes e validação por fases (bancada, transceptor, alimentação, carro).
+- [`voltar-ao-simulador.md`](voltar-ao-simulador.md): plano B, como seguir só com o simulador se o hardware não for adiante.
+- `scripts/coletar_adaptador.py`: coleta de um adaptador ELM327 remoto (o ESP32) com o mesmo coletor do simulador.
