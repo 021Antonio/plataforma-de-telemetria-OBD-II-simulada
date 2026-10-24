@@ -20,8 +20,8 @@ ESCALA = {"haiku": "sonnet", "sonnet": "opus"}
 GATE = 'pip install -e ".[dev]" -q && make lint && make test'
 TOOLS = "Read Write Edit Glob Grep Bash"
 MAX_TURNS = "120"
-LIMIT_WAIT = 30 * 60  # espera ao bater limite de uso
-LIMIT_TRIES = 12      # até ~6 h esperando
+PROBE_EVERY = 15 * 60          # testa a cota a cada 15 min
+MAX_ESPERA = 48 * 3600         # desiste após 48 h sem cota
 
 
 def sh(cmd, **kw):
@@ -44,24 +44,45 @@ def prompt(t, extra=""):
     return (f"Leia apenas {t['file']} e as seções de docs/spec citadas nele (campo spec). "
             "Escreva os testes primeiro, implemente, rode os comandos do critério de pronto "
             "e corrija até passarem. Não pergunte nada: decida pela spec e registre dúvidas "
-            "em docs/duvidas.md. Não toque em outras tarefas. Termine com um resumo de até 5 linhas."
+            "em docs/duvidas.md. Se `git status` mostrar trabalho parcial, continue dele em vez de recomeçar. "
+            "Não toque em outras tarefas. Termine com um resumo de até 5 linhas."
             + extra)
 
 
+LIMIT_KEYS = ("rate limit", "usage limit", "limit reached", "limit will reset",
+              "quota", "overloaded", "429")
+
+
+def limite(r):
+    blob = (r.stdout + r.stderr).lower()
+    return r.returncode != 0 and any(k in blob for k in LIMIT_KEYS)
+
+
+def espera_cota():
+    """Dorme e testa com uma chamada mínima até a cota voltar."""
+    inicio = time.time()
+    while time.time() - inicio < MAX_ESPERA:
+        print(f"  sem cota ({datetime.now():%d/%m %H:%M}); testo de novo em {PROBE_EVERY // 60} min", flush=True)
+        time.sleep(PROBE_EVERY)
+        p = sh(["claude", "-p", "responda ok", "--model", "haiku", "--max-turns", "1"])
+        if p.returncode == 0 and not limite(p):
+            print("  cota voltou; retomando", flush=True)
+            return True
+    return False
+
+
 def claude(model, text, log):
-    for i in range(LIMIT_TRIES):
+    while True:
         r = sh(["claude", "-p", text, "--model", model, "--max-turns", MAX_TURNS,
                 "--permission-mode", "acceptEdits", "--allowedTools", TOOLS,
                 "--output-format", "json"])
-        log.write_text(log.read_text() + f"\n--- {model} ---\n{r.stdout}\n{r.stderr}" if log.exists()
-                       else f"--- {model} ---\n{r.stdout}\n{r.stderr}")
-        blob = (r.stdout + r.stderr).lower()
-        if r.returncode != 0 and any(k in blob for k in ("rate limit", "usage limit", "limit reached", "overloaded")):
-            print(f"  limite de uso; espero 30 min ({i + 1}/{LIMIT_TRIES})", flush=True)
-            time.sleep(LIMIT_WAIT)
-            continue
+        with log.open("a") as f:
+            f.write(f"\n--- {model} ---\n{r.stdout}\n{r.stderr}")
+        if limite(r):
+            if not espera_cota():
+                sys.exit("A cota não voltou a tempo. Rode de novo: ele retoma de onde parou.")
+            continue  # mesma tentativa, não conta como falha
         return r.returncode == 0
-    return False
 
 
 def gate():
