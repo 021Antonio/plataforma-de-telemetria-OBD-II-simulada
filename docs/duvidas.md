@@ -24,3 +24,17 @@ para seguir em frente. Revise e ajuste quando for necessário.
    `pre-commit autoupdate`.
 7. **Configuração do mypy e do ruff.** Não definida pela tarefa. Decisão: mypy
    em modo `strict`, ruff com regras `E, F, I, UP, B, SIM` e linha de 100 colunas.
+
+## Tarefa 01 (protocolo base)
+
+1. **Resolução dos PIDs.** A spec arredonda (0,392; 0,781). Decisão: `resolution` usa o passo
+   exato (100/255, 100/128), senão o erro de ida e volta pode passar de `resolution / 2`.
+2. **`parse_response(raw)`.** A spec dá só `raw`, mas "PID errado é rejeitado" exige a requisição.
+   Decisão: parâmetro opcional `request`; sem ele valida só o modo+0x40 e o tamanho do PID.
+3. **`PidDef` estendido.** Acrescentei `min_value` e `max_value` (faixa física) para os testes de
+   propriedade. `encode` satura fora da faixa.
+4. **PID 0x06.** Fórmula (A−128)·100/128 implementada como `A·100/128 − 100` (equivalente).
+5. **Máscara de suporte.** `decode_supported` inclui o bit de continuação (0x20, 0x40, 0x60).
+6. **Quadros.** `CanFrame` valida ID (0x7DF, 0x7E0–0x7E8) e DLC=8; o byte PCI do ISO-TP fica
+   para a tarefa 02. Modo 04 rejeita resposta com mais de 1 byte.
+7. **Descrições de DTC.** Textos em português escritos por mim (exceto P0300, da spec).
