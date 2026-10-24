@@ -198,6 +198,7 @@ para seguir em frente. Revise e ajuste quando for necessário.
 5. **VIN (Modo 09).** Devolvido em uma linha só, já remontado (`49 02 01 ...`), como pede a tarefa. Adaptadores reais imprimem multilinha (`0:`/`1:`); o cliente aceita as duas formas, mas apps de terceiros podem esperar a multilinha.
 6. **Comandos fora do escopo** (`ATST`, `ATAT`, `ATSH`, outros `ATSPn`…) devolvem `?`. Apps de terceiros podem enviá-los; ampliar se a validação manual falhar.
 7. **Cliente.** Timeout do primeiro pedido é de ao menos 5 s (busca de protocolo); `NO DATA`, `?` e erros do chip viram `None` (o coletor trata como timeout). `build_transport("elm327_tcp")` ganhou `host` e `port`.
+9. **Atualização (tarefa 16).** O formato de resposta foi validado contra o python-OBD 0.7.3 (cliente de terceiros), não contra um chip real. Itens 3 e 6 mudaram: `ATH1` imprime `7E8 <PCI> <dados>` por quadro (sem preenchimento 0x55); `ATDPN`, `ATSPn`/`ATTPn`, `ATAT`, `ATST`, `ATSH`, `ATCAF`, `ATS`, `ATAL`, `ATCRA` são aceitos; serviço/PID sem suporte e a negativa `7F` da ECU viram `NO DATA`; `0900` devolve `49 00 40 00 00 00`. Com `ATH0` o multiquadro continua em uma linha. Dúvida: um chip real imprime `NO DATA` também para `7F` de serviço não suportado? Assumido que sim. Apps de celular seguem sem teste.
 8. **Validação manual com app de terceiros** (`docs/ensaios.md`) não foi feita: exige cliente real e é interativa. Pendente.
 
 ## Tarefa 10 (ensaios)

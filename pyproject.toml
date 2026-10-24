@@ -40,9 +40,12 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--strict-markers -m \"not broker\""
+addopts = "--strict-markers -m \"not broker and not realclient\""
 asyncio_mode = "auto"
-markers = ["broker: precisa de um broker MQTT real em localhost:1883 (fora do make test)"]
+markers = [
+    "broker: precisa de um broker MQTT real em localhost:1883 (fora do make test)",
+    "realclient: instala o python-OBD num venv temporário (precisa de rede; fora do make test)",
+]
 pythonpath = ["tests"]
 
 [tool.coverage.run]

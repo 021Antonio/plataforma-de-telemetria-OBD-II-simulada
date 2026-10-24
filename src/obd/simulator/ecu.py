@@ -252,6 +252,8 @@ class Ecu:
         if mode == MODE_VEHICLE_INFO:
             if n != 2:
                 return self._bad_length(mode)
+            if payload[1] == 0x00:  # máscara do Modo 09: só o PID 0x02 (VIN)
+                return bytes([mode + 0x40, 0x00, 0x40, 0x00, 0x00, 0x00])
             if payload[1] != PID_VIN:
                 return _negative(mode, NRC_SUBFUNCTION_NOT_SUPPORTED)
             return build_vin_response(self._vin)
