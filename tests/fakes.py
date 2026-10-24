@@ -188,3 +188,50 @@ class FakeElm327Client:
         for command, expected in script:
             got = await self.send(command)
             assert got == expected, f"{command!r}: esperado {expected!r}, veio {got!r}"
+
+
+class FakeElm327Mutant:
+    """Proxy TCP que reescreve comandos antes de repassá-los a um servidor ELM327 real.
+
+    Serve para fabricar uma implementação errada de propósito: `{"ATDPN": "ATFOO"}` faz o
+    servidor responder `?` a `ATDPN`; `{"ATH1": "ATH0"}` faz o servidor ignorar `ATH1`."""
+
+    def __init__(self, upstream_port: int, rewrite: Mapping[str, str]) -> None:
+        self._upstream_port = upstream_port
+        self._rewrite = dict(rewrite)
+        self._server: asyncio.Server | None = None
+
+    @property
+    def port(self) -> int:
+        assert self._server is not None
+        return int(self._server.sockets[0].getsockname()[1])
+
+    async def __aenter__(self) -> FakeElm327Mutant:
+        self._server = await asyncio.start_server(self._serve, "127.0.0.1", 0)
+        return self
+
+    async def __aexit__(self, *exc: object) -> None:
+        assert self._server is not None
+        self._server.close()
+        await self._server.wait_closed()
+
+    async def _serve(self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+        up_r, up_w = await asyncio.open_connection("127.0.0.1", self._upstream_port)
+
+        async def back() -> None:
+            while data := await up_r.read(256):
+                writer.write(data)
+                await writer.drain()
+
+        pump = asyncio.create_task(back())
+        try:
+            while line := await reader.readuntil(b"\r"):
+                cmd = line.strip().decode()
+                up_w.write(self._rewrite.get(cmd, cmd).encode() + b"\r")
+                await up_w.drain()
+        except (asyncio.IncompleteReadError, ConnectionError):
+            pass
+        finally:
+            pump.cancel()
+            up_w.close()
+            writer.close()

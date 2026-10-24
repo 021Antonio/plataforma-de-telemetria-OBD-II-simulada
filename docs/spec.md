@@ -14,6 +14,7 @@ Para economizar tokens, cada tarefa lê **só** a seção que cita.
 | 6 | [06-simulador.md](spec/06-simulador.md) | Modelo de veículo, perfis, falhas, mocks |
 | 7 | [07-dados-web.md](spec/07-dados-web.md) | Esquema SQLite, dashboard, painel de controle |
 | 8 | [08-testes.md](spec/08-testes.md) | Pirâmide de testes, ensaios E1 a E6, critérios de aceite |
+| 9 | [09-elm327-dialeto.md](spec/09-elm327-dialeto.md) | Dialeto ELM327 (AT, OBD, erros) e suíte de conformidade |
 
 ## Fluxo de trabalho
 

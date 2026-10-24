@@ -269,3 +269,19 @@ para seguir em frente. Revise e ajuste quando for necessário.
    da captura mostra só o degrau inicial (captura em ~5 s); o status do DTC vem em inglês
    ("stored") da API e não foi traduzido (mudaria contrato); o `Automático` aparece esmaecido
    em vez de oculto quando não há sobreposição. Não foi verificado a 1920 px por captura.
+
+## Tarefa 17 (conformidade ELM327)
+
+1. **`--config perfil.json`.** A tarefa não define o formato. Decidido: JSON com `ignorar`
+   (comandos) e `esperado` (comando para resposta crua), aplicado a todas as ocorrências do
+   comando. Serve, por exemplo, para o `ATRV` do ESP32, que lê a tensão real.
+2. **"Estado esperado" do roteiro.** Guardado como dados em `roteiro.py` (eco, avanço de linha,
+   espaços, cabeçalhos depois de cada passo), mas a verificação é pela resposta crua do
+   dourado, que já carrega o efeito do estado.
+3. **Escopo do dourado.** Valores fixos e sem DTCs; por isso `03` esperado é `NO DATA`. O caso
+   `43 01 03 00` está na spec, mas não no roteiro (o firmware não tem injeção de DTC garantida).
+4. **Dourado gerado do simulador.** Se o simulador estiver errado, o dourado herda o erro;
+   continua sem conferência contra um ELM327 real. `python -m tests.conformance.gerar` regenera e
+   um teste falha se o arquivo ficar defasado.
+5. **Divergências encontradas na spec 04.** A linha `ATSP6`/`ATSP0` diz só "CAN 11 bits"; o
+   código também aceita `ATSPA6` e `ATTP`, e `ATDP` muda com o modo (AUTO). Documentado na 09.
