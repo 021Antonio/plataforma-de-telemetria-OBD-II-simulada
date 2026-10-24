@@ -7,7 +7,7 @@ Por tarefa: sessão nova, modelo do cabeçalho, porta de qualidade (lint + test)
 1 nova tentativa, escalada de modelo se falhar, commit e push.
 Tarefa que não passa fica "bloqueada" e só os dependentes dela são pulados.
 """
-import argparse, json, re, subprocess, sys, time
+import argparse, json, os, re, subprocess, sys, time
 from datetime import datetime
 from pathlib import Path
 
@@ -135,7 +135,8 @@ def main():
         if ok:
             sh(["git", "add", "-A", ":!runs-night"])
             sh(["git", "commit", "-q", "-m", f"Tarefa {tid}: {t['title']}\n\nCo-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"])
-            sh(["git", "push", "-q", "-u", "origin", branch])
+            if os.environ.get("NIGHT_PUSH", "1") == "1":
+                sh(["git", "push", "-q", "-u", "origin", branch])
 
     print("\nResumo:", json.dumps(state, indent=1))
     (LOGS / "RESUMO.md").write_text(
