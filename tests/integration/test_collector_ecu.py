@@ -92,11 +92,9 @@ async def test_transport_swap_by_config_does_not_change_collector(
     assert via_can == via_loop and len(via_can) == len(VALUES)
 
 
-def test_unknown_and_pending_transports() -> None:
+def test_unknown_and_incomplete_transports() -> None:
     with pytest.raises(ValueError):
         build_transport("serial")
-    with pytest.raises(NotImplementedError):
-        build_transport("elm327_tcp")
     with pytest.raises(ValueError):
         build_transport("loopback")
 

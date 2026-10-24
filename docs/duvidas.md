@@ -188,3 +188,14 @@ para seguir em frente. Revise e ajuste quando for necessário.
 7. **Limites de entrada.** Atraso de 0 a 1000 ms (acima disso o coletor de 100 ms já estoura o timeout); perda e corrupção de 0 a 1; sementes de 0 a 2³²−1. Limites escolhidos, não definidos na spec.
 8. **Nomes das variáveis** seguem a spec: `rpm`, `speed`, `coolant`, `throttle`, `fuel`, `voltage`. O estado usa chaves em português (`variaveis`, `fisico`, `perfil`, `latencia`, `rede`, `sem_resposta`).
 9. **Painel servido em `/`** da aplicação do simulador, montado depois das rotas da API. Não há comando para subir a porta 8001 ainda: o `make run` continua sem alvo real.
+
+## Tarefa 09 (ELM327)
+
+1. **Caminho dos arquivos.** `src/obd/simulator/elm327_server.py` e `src/obd/transport/elm327_tcp.py`, conforme o layout do CLAUDE.md.
+2. **Servidor sobre um `Transport`.** `Elm327Server(backend)` fala com a ECU por um transporte (nos testes, `LoopbackTransport`). Assim ISO-TP, atraso e falhas injetadas valem também no ELM327. Tempo de espera pela ECU: 200 ms (o `ATST` padrão do chip real), escolha nossa.
+3. **Padrões após `ATZ`:** eco ligado, espaços ligados, linefeed e cabeçalhos desligados, como no chip. O servidor ecoa o próprio `ATE0` (o eco ainda estava ligado ao recebê-lo) e não ecoa `ATZ`; não confirmado contra um chip real.
+4. **Sem DTCs no Modo 03.** A ECU responde `43 00`; o servidor converte em `NO DATA`, como diz a spec. Um adaptador real costuma imprimir `43 00`.
+5. **VIN (Modo 09).** Devolvido em uma linha só, já remontado (`49 02 01 ...`), como pede a tarefa. Adaptadores reais imprimem multilinha (`0:`/`1:`); o cliente aceita as duas formas, mas apps de terceiros podem esperar a multilinha.
+6. **Comandos fora do escopo** (`ATST`, `ATAT`, `ATSH`, outros `ATSPn`…) devolvem `?`. Apps de terceiros podem enviá-los; ampliar se a validação manual falhar.
+7. **Cliente.** Timeout do primeiro pedido é de ao menos 5 s (busca de protocolo); `NO DATA`, `?` e erros do chip viram `None` (o coletor trata como timeout). `build_transport("elm327_tcp")` ganhou `host` e `port`.
+8. **Validação manual com app de terceiros** (`docs/ensaios.md`) não foi feita: exige cliente real e é interativa. Pendente.

@@ -157,3 +157,34 @@ class FakeBroker:
 
     def come_back(self) -> None:
         self.up = True
+
+
+class FakeElm327Client:
+    """Cliente ELM327 de texto puro (sem `Elm327TcpTransport`): envia uma linha e lê até `>`."""
+
+    def __init__(self, host: str, port: int) -> None:
+        self._host = host
+        self._port = port
+        self._reader: asyncio.StreamReader | None = None
+        self._writer: asyncio.StreamWriter | None = None
+
+    async def __aenter__(self) -> FakeElm327Client:
+        self._reader, self._writer = await asyncio.open_connection(self._host, self._port)
+        return self
+
+    async def __aexit__(self, *exc: object) -> None:
+        assert self._writer is not None
+        self._writer.close()
+        await self._writer.wait_closed()
+
+    async def send(self, command: str) -> str:
+        """Devolve a resposta crua, incluindo o `\\r\\r>` final."""
+        assert self._reader is not None and self._writer is not None
+        self._writer.write(command.encode() + b"\r")
+        raw = await asyncio.wait_for(self._reader.readuntil(b">"), 2)
+        return raw.decode()
+
+    async def run_script(self, script: Iterable[tuple[str, str]]) -> None:
+        for command, expected in script:
+            got = await self.send(command)
+            assert got == expected, f"{command!r}: esperado {expected!r}, veio {got!r}"
