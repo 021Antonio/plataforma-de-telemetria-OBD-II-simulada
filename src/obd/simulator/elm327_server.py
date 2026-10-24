@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import os
 import re
 
 from obd.protocol.isotp import segment
@@ -25,8 +26,9 @@ MAX_REQUEST = 7  # um quadro único ISO-TP
 _VOLTAGE_PID = 0x42
 _HEX = re.compile(r"[0-9A-F]+")
 _AT_FLAGS = {"E": "echo", "L": "linefeed", "S": "spaces", "H": "headers"}
-# Aceitos com `OK` e sem efeito: ATAT, ATST, ATSH, ATCAF, ATAL, ATCRA, ATD.
-_AT_ACCEPTED = ("AT", "ST", "SH", "CAF", "CRA", "AL", "D")
+# Aceitos com `OK` e sem efeito (ajustes que os apps mandam e que o simulador não precisa).
+_AT_ACCEPTED = ("AT", "ST", "SH", "CAF", "CRA", "AL", "D", "M", "R", "PC", "JHF", "JS", "FE", "SW",
+                "WM", "CF", "CM", "CS", "V", "KW", "IB", "BI", "SS", "CV")  # fmt: skip
 
 
 class _Session:
@@ -109,7 +111,10 @@ class Elm327Server:
         out = line.strip() + eol if echoed else ""
         for text in lines:
             out += text + eol
-        return (out + eol + PROMPT).encode("latin-1")
+        reply = (out + eol + PROMPT).encode("latin-1")
+        if os.environ.get("OBD_ELM327_LOG") == "1":
+            print(f"ELM327 << {cmd!r} >> {reply.decode('latin-1')!r}", flush=True)
+        return reply
 
     async def _execute(self, s: _Session, cmd: str) -> list[str]:
         if cmd.startswith("AT"):
@@ -130,6 +135,10 @@ class Elm327Server:
         if arg == "Z":
             s.reset()
             return [VERSION]
+        if arg in ("I", "WS"):
+            return [VERSION]
+        if arg == "IGN":
+            return ["ON"]
         if arg == "DP":
             return [f"AUTO, {PROTOCOL}" if s.auto else PROTOCOL]
         if arg == "DPN":
