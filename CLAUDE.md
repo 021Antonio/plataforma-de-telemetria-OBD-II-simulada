@@ -37,4 +37,4 @@ make run       # sobe servidor, simulador e coletor
 
 ## Execução noturna
 
-`python scripts/night.py` (cria .venv e roda `run_night.py` isolado) roda todas as tarefas em ordem, sem aprovação (ver docs/PLAN.md). Logs em `runs-night/`.
+Recomendado (isolado): `docker compose -f docker-compose.night.yml run --rm night` (ver docker-compose.night.yml). Alternativa: `python scripts/night.py --skip 00 11` (cria .venv). Logs e estado em `runs-night/`. `--skip` marca a tarefa como já feita para as dependências.
