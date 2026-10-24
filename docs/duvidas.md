@@ -253,3 +253,18 @@ para seguir em frente. Revise e ajuste quando for necessário.
    separados; textos "3000 rpm" e "-0.62 bar" não cobrem mais os números da escala.
    `docs/img/painel.png`: botões "Automático" inteiros e sliders visíveis. Observação: o gráfico
    de 60 s mostra só o degrau de 800 para 3000 rpm no início da sessão (captura feita em ~5 s).
+
+## Tarefa 15 (redesenho visual)
+
+1. **Tokens compartilhados.** Os dois servidores montam pastas estáticas separadas, então o
+   bloco `:root` (cores, espaços, raio, fonte) está duplicado em `dashboard/style.css` e
+   `simulator_panel/style.css`; um teste confere que os tokens existem nos dois.
+2. **Mudou (antes em `docs/img/antes`, depois em `docs/img`).** Tema claro único (o painel
+   perdia o tema escuro automático), grade de 12 colunas, conta-giros e velocidade em destaque,
+   bloco secundário (temperatura, combustível, tensão, carga, borboleta, mistura), gráfico com
+   abas, área, grade e eixos, MIL vermelho, estados de conexão com ponto colorido, painel com
+   interruptor, botões primário e secundário, monitor com requisição (azul) e resposta (verde).
+3. **Ainda incomoda.** Cartão de velocidade fica vazio quando o carro está parado; o gráfico
+   da captura mostra só o degrau inicial (captura em ~5 s); o status do DTC vem em inglês
+   ("stored") da API e não foi traduzido (mudaria contrato); o `Automático` aparece esmaecido
+   em vez de oculto quando não há sobreposição. Não foi verificado a 1920 px por captura.

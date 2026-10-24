@@ -26,7 +26,7 @@ const BARS = {
 
 const state = {
   ws: null, open: false, attempt: 0, lastSampleAt: null, lastSeq: null,
-  times: [], series: {}, descriptions: {}, errors: { timeouts: 0, invalid: 0 }, latest: {},
+  times: [], series: {}, tab: "rpm", descriptions: {}, errors: { timeouts: 0, invalid: 0 }, latest: {},
 };
 
 function polar(angleDeg, r) {
@@ -42,8 +42,8 @@ function drawTicks(groupId, min, max, step, label) {
     const [x2, y2] = polar(ang, 76);
     const [tx, ty] = polar(ang, 64);
     g.insertAdjacentHTML("beforeend",
-      `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#99a" stroke-width="2"/>` +
-      `<text x="${tx}" y="${ty + 3}" text-anchor="middle" font-size="9" fill="#556">${label(v)}</text>`);
+      `<line class="gtick" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>` +
+      `<text class="gnum" x="${tx}" y="${ty + 3}" text-anchor="middle">${label(v)}</text>`);
   }
 }
 
@@ -54,7 +54,7 @@ function drawRedline() {
 }
 
 function setNeedle(id, angle) {
-  $(id).setAttribute("transform", `rotate(${angle})`);
+  $(id).style.transform = `rotate(${angle}deg)`;
 }
 
 function val(latest, name) {
@@ -113,16 +113,24 @@ function render(latest, now) {
 }
 
 function drawChart() {
-  const name = $("chart-series").value;
-  const pts = state.series[name] || [];
+  const pts = state.series[state.tab] || [];
   const now = Date.now() / 1000;
-  if (pts.length < 2) { $("chart-line").setAttribute("points", ""); return; }
+  if (pts.length < 2) {
+    for (const id of ["chart-line", "chart-area"]) $(id).setAttribute("points", "");
+    $("chart-max").textContent = $("chart-min").textContent = "–";
+    return;
+  }
   const vs = pts.map((p) => p.v);
   const lo = Math.min(...vs), hi = Math.max(...vs);
   const span = hi - lo || 1;
-  $("chart-line").setAttribute("points", pts.map((p) =>
-    `${(600 * (1 - (now - p.t) / WINDOW_S)).toFixed(1)},${(140 - 130 * (p.v - lo) / span).toFixed(1)}`
-  ).join(" "));
+  const xy = pts.map((p) =>
+    [600 * (1 - (now - p.t) / WINDOW_S), 140 - 130 * (p.v - lo) / span]);
+  const line = xy.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  $("chart-line").setAttribute("points", line);
+  $("chart-area").setAttribute("points", `${xy[0][0].toFixed(1)},140 ${line} ${xy[xy.length - 1][0].toFixed(1)},140`);
+  const dec = span < 10 ? 1 : 0;
+  $("chart-max").textContent = hi.toFixed(dec);
+  $("chart-min").textContent = lo.toFixed(dec);
 }
 
 function addEvent(text) {
@@ -177,7 +185,10 @@ function refreshState() {
   const pill = $("conn-state");
   pill.className = "pill " + st;
   pill.textContent = { connected: "conectado", reconnecting: "reconectando", nodata: "sem dados" }[st];
-  $("overlay").hidden = st === "connected";
+  const overlay = $("overlay");
+  overlay.hidden = st === "connected";
+  overlay.className = "overlay " + st;
+  overlay.textContent = st === "reconnecting" ? "Reconectando: valores ocultos" : "Sem dados: valores ocultos";
   document.body.classList.toggle("stale", st !== "connected");
   $("rate").textContent = G.rateHz(state.times, now, RATE_WINDOW_S).toFixed(1);
   if (st !== "connected") {
@@ -217,7 +228,13 @@ drawTicks("map-ticks", MAP_MIN_BAR, MAP_MAX_BAR, 0.5, (v) => v.toFixed(1));
 drawRedline();
 setNeedle("rpm-needle", G.needleAngle(0, 0, RPM_MAX));
 setNeedle("map-needle", G.needleAngle(0, MAP_MIN_BAR, MAP_MAX_BAR));
-$("chart-series").addEventListener("change", drawChart);
+$("chart-tabs").addEventListener("click", (ev) => {
+  const tab = ev.target.closest("[data-series]");
+  if (!tab) return;
+  state.tab = tab.dataset.series;
+  for (const t of $("chart-tabs").children) t.setAttribute("aria-selected", String(t === tab));
+  drawChart();
+});
 setInterval(refreshState, 500);
 refreshState();
 connect();
