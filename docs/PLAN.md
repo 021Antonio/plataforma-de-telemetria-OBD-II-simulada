@@ -23,12 +23,15 @@ Gerado a partir de `tasks/*.md`. Uma tarefa por sessão. O modelo é o mais bara
 | 15 | S15 | [15 Redesenho visual do dashboard e do painel do simulador](../tasks/15-dashboard-design.md) | sonnet | 14 | nenhuma | M | o resultado visual continua desorganizado ou parecido com o anterior após 2 iterações: usar opus uma vez para direção de design |
 | 16 | S16 | [16 Compatibilidade do ELM327 simulado com clientes reais (python-OBD)](../tasks/16-elm327-clientes-reais.md) | sonnet | 09, 13 | nenhuma | M | o python-OBD ainda não lê rotação, velocidade e DTCs após 2 iterações |
 | 17 | S17 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10, 13, 15, 16 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
+| 18 | S18 | [17 Especificação do dialeto ELM327 e suíte de conformidade contra qualquer endereço TCP](../tasks/17-elm327-conformidade.md) | sonnet | 16 | nenhuma | M | a suíte não consegue distinguir respostas corretas de incorretas entre duas implementações após 2 iterações |
+| 19 | S19 | [18 Coletor tolerante a respostas de erro, atrasos e quedas de um adaptador real](../tasks/18-coletor-adaptador-real.md) | sonnet | 16, 17 | nenhuma | M | a reconexão deixa o coletor em estado inconsistente ou há condição de corrida após 2 iterações |
+| 20 | S20 | [19 Firmware do ESP32 DevKit como adaptador ELM327 por Wi-Fi](../tasks/19-firmware-esp32.md) | sonnet | 17, 18 | nenhuma | G | o ISO-TP multiquadro (VIN, DTCs) falha em algum comprimento após 2 iterações: usar opus uma vez |
 
 **MVP:** fim da tarefa 07 (dashboard); o MQTT (12) entra antes dele na ordem (coleta, servidor, banco e dashboard funcionando de ponta a ponta).
 
 ## Caminho crítico
 
-00, 01, 02, 03, 05, 12, 10, 11. As tarefas 06, 07, 08, 09 e 12 saem do caminho crítico e podem rodar em paralelo, em sessões separadas.
+00, 01, 02, 03, 05, 12, 10, 11. As tarefas 17, 18 e 19 (ESP32) ficam depois do texto do TCC e não bloqueiam a entrega. As tarefas 06, 07, 08, 09 e 12 saem do caminho crítico e podem rodar em paralelo, em sessões separadas.
 
 ## Como lançar uma sessão
 
