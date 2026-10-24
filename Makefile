@@ -14,4 +14,4 @@ lint:
 	$(PYTHON) -m mypy
 
 run:
-	@echo "make run: servidor, simulador e coletor ainda não foram implementados."
+	$(PYTHON) -m obd run

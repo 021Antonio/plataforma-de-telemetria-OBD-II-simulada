@@ -212,3 +212,25 @@ para seguir em frente. Revise e ajuste quando for necessário.
 8. **Pacote `tests/benchmarks`.** Tem `__init__.py` e imports relativos para funcionar em `python -m tests.benchmarks.eN` e no pytest (`benchmarks.*`). `tests/` não pode ganhar `__init__.py`: quebra o `import fakes` dos outros testes no mypy.
 9. **Desvio padrão** amostral (n − 1); percentis por posto mais próximo, como em `GET /api/stats`.
 10. **Segunda máquina.** Não há segunda máquina aqui: `docs/ensaios.md` traz as instruções, mas só uma máquina foi medida. Pendente.
+
+## Tarefa 13 (orquestração do `make run`)
+
+1. **Capturas de tela.** O Playwright e o Chromium (headless shell) instalaram, mas o
+   navegador não abre: faltam bibliotecas do sistema (`libnss3`, `libatk`, `libgbm`, `libasound`
+   etc.) e o ambiente não tem root para instalá-las. Sem as PNG em `docs/img/`. Para gerar:
+   `playwright install-deps chromium` com privilégio e repetir a captura com `make run` ativo
+   (aplicar `PUT /sim/override/rpm` e `POST /sim/dtc` antes, e conferir que não há "reconectando").
+2. **Dependência `websockets`.** O uvicorn só atende `WS /ws/stream` com uma biblioteca de
+   WebSocket; adicionada ao `pyproject.toml` (não vinha em `uvicorn` puro).
+3. **Código-base.** A branch `night/20261024` não continha as tarefas 01–10 e 12 (estavam
+   empilhadas em `task/10-ensaios`); `task/13-run-orquestracao` parte de `task/10-ensaios`
+   mais `main`.
+4. **Transporte do coletor.** `coletor.transporte: loopback` (padrão) compartilha com o servidor
+   ELM327 a mesma instância de `LoopbackTransport` sobre o `Simulator` (um só lock, e `POST
+   /sim/seed` continua valendo). `elm327_tcp` conecta no próprio servidor ELM327 do processo
+   (exige não usar `--sem-elm327`). `can_virtual` não tem ECU ligada ao barramento neste
+   processo; fica fora do `run`.
+5. **Interface de escuta.** `--host` (padrão 127.0.0.1); a imagem Docker usa 0.0.0.0. O
+   `docker compose` não pôde ser validado aqui (Docker ausente no ambiente).
+6. **`make run` e Ctrl+C.** O encerramento limpo (código 0, sem traceback) é provado por SIGINT
+   e SIGTERM nos testes de subprocesso; o `make` em si propaga o código do processo.

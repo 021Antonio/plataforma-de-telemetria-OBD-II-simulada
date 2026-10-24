@@ -18,6 +18,7 @@ dependencies = [
     "pyyaml",
     "httpx",
     "aiomqtt",
+    "websockets",
 ]
 
 [project.optional-dependencies]

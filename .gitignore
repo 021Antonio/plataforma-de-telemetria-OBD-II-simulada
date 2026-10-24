@@ -223,3 +223,6 @@ runs-night/
 
 # Ensaios (saída local; um exemplo fica em docs/ensaios/)
 runs/
+
+# banco local do make run
+/data/

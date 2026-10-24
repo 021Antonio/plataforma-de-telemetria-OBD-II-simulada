@@ -24,7 +24,21 @@ make cov    # testes com cobertura
 make lint   # ruff e mypy
 ```
 
-## Execução
+## Como rodar
 
-`make run` ainda não sobe nada: o servidor, o simulador e o coletor entram em
-tarefas posteriores.
+```bash
+make run     # servidor, simulador, painel, ELM327 e coletor num só processo
+```
+
+- Dashboard: <http://localhost:8000/>
+- Painel de controle do simulador: <http://localhost:8001/>
+- Servidor ELM327 (TCP): `localhost:35000`
+
+Ctrl+C encerra tudo. Opções: `python -m obd run --perfil urbano --db data/obd.db --sem-elm327`
+(portas com `--porta-servidor`, `--porta-painel` e `--porta-elm327`).
+
+> **Atenção:** abra os HTML sempre pelas URLs acima. Abri-los por servidor estático
+> (Live Server, `file://`) mostra a tela sem dados, porque a API e o WebSocket só existem
+> no servidor da plataforma.
+
+Com Docker: `docker compose up app` (o Mosquitto continua opcional: `--profile mqtt`).

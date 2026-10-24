@@ -5,16 +5,24 @@ from __future__ import annotations
 import asyncio
 import time
 from collections.abc import Callable
+from typing import Protocol
 
 from obd.protocol.frames import CanFrame
-from obd.simulator.ecu import Ecu
 from obd.transport.isotp_client import POLL_INTERVAL, Sleep, exchange
+
+
+class FrameBus(Protocol):
+    """O que o loopback precisa do outro lado: uma `Ecu` ou o `Simulator` (que a envolve)."""
+
+    def on_frame(self, can_id: int, data: bytes) -> None: ...
+
+    def poll(self) -> list[CanFrame]: ...
 
 
 class LoopbackTransport:
     def __init__(
         self,
-        ecu: Ecu,
+        ecu: FrameBus,
         *,
         clock: Callable[[], float] = time.monotonic,
         sleep: Sleep = asyncio.sleep,

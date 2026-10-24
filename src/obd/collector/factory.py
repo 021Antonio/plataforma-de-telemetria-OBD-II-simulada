@@ -8,11 +8,10 @@ from typing import Any
 from obd.collector.mqtt_publisher import MqttPublisher
 from obd.collector.publisher import HttpPublisher, Publisher
 from obd.mqtt_common import AiomqttLink, LinkFactory
-from obd.simulator.ecu import Ecu
 from obd.transport.base import Transport
 from obd.transport.can_virtual import CanVirtualTransport
 from obd.transport.elm327_tcp import Elm327TcpTransport
-from obd.transport.loopback import LoopbackTransport
+from obd.transport.loopback import FrameBus, LoopbackTransport
 
 TRANSPORTS = ("can_virtual", "loopback", "elm327_tcp")
 
@@ -20,7 +19,7 @@ TRANSPORTS = ("can_virtual", "loopback", "elm327_tcp")
 def build_transport(
     kind: str,
     *,
-    ecu: Ecu | None = None,
+    ecu: FrameBus | None = None,
     channel: str = "obd",
     host: str = "localhost",
     port: int = 35000,
