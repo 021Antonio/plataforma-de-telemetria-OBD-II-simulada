@@ -18,7 +18,8 @@ Gerado a partir de `tasks/*.md`. Uma tarefa por sessão. O modelo é o mais bara
 | 10 | S10 | [08 API de controle e painel do simulador](../tasks/08-painel-controle.md) | haiku | 04 | 05, 06, 07, 09, 12 | P | overrides não refletem na leitura após 2 iterações; passar para sonnet |
 | 11 | S11 | [09 Camada ELM327 (servidor TCP e cliente)](../tasks/09-elm327.md) | sonnet | 03 | 05, 06, 07, 08, 12 | M | cliente de terceiros não conclui o handshake após 2 iterações |
 | 12 | S12 | [10 Ensaios E1 a E7, métricas e gráficos](../tasks/10-ensaios.md) | sonnet | 04, 05, 06, 09, 12 | nenhuma | M | métricas inconsistentes entre execuções com as mesmas sementes após 2 iterações |
-| 13 | S13 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
+| 13 | S13 | [13 Orquestração (make run), serviços no Compose e verificação de ponta a ponta](../tasks/13-run-orquestracao.md) | sonnet | 05, 06, 07, 08, 09, 12 | nenhuma | M | o processo não sobe ou não encerra limpo após 2 iterações, ou a amostra não chega ao dashboard |
+| 14 | S14 | [11 Reescrita dos capítulos do TCC com os resultados reais](../tasks/11-texto-tcc.md) | sonnet | 10, 13 | nenhuma | M | revisão final de coerência entre objetivos, método e conclusões: usar opus uma vez |
 
 **MVP:** fim da tarefa 07 (dashboard); o MQTT (12) entra antes dele na ordem (coleta, servidor, banco e dashboard funcionando de ponta a ponta).
 
