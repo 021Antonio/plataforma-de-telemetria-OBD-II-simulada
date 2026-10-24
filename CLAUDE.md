@@ -34,3 +34,7 @@ make run       # sobe servidor, simulador e coletor
 
 - Nunca commitar em `main`; use um branch por tarefa (`task/NN-nome`).
 - Commits curtos e no imperativo.
+
+## Execução noturna
+
+`python scripts/run_night.py` roda todas as tarefas em ordem, sem aprovação (ver docs/PLAN.md). Logs em `runs-night/`.
