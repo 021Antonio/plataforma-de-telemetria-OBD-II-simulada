@@ -24,7 +24,7 @@ Para economizar tokens, cada tarefa lê **só** a seção que cita.
 ## Decisões em aberto
 
 1. Servidor e simulador no mesmo processo ou separados (padrão: separados, portas 8000 e 8001).
-2. MQTT na v1 ou opcional (padrão: opcional).
+2. ~~MQTT na v1 ou opcional~~ Decidido: entra na v1 como canal opcional (tarefa 12); HTTP continua o padrão.
 3. ISO-TP próprio ou biblioteca `can-isotp` (padrão: implementação própria; a biblioteca serve de referência nos testes).
 4. Front-end em JavaScript puro ou React (padrão: JavaScript puro).
 
