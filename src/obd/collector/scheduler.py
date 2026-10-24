@@ -40,7 +40,8 @@ class BackoffConfig:
 class CollectorConfig:
     transport: str = "loopback"
     interval_ms: float = 100.0
-    timeout_ms: int = 100
+    timeout_ms: int = 500
+    search_timeout_s: float = 5.0
     dtc_interval_s: float = 2.0
     backoff: BackoffConfig = BackoffConfig()
     plan: Mapping[int, PidRate] | None = None
@@ -60,7 +61,8 @@ class CollectorConfig:
         return cls(
             transport=str(data.get("transporte", "loopback")),
             interval_ms=float(data.get("intervalo_ms", 100)),
-            timeout_ms=int(data.get("timeout_ms", 100)),
+            timeout_ms=int(data.get("timeout_ms", 500)),
+            search_timeout_s=float(data.get("timeout_busca_s", 5.0)),
             dtc_interval_s=float(data.get("dtc_intervalo_s", 2.0)),
             backoff=backoff,
             plan=plan or None,

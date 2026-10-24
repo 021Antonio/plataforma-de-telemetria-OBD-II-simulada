@@ -127,14 +127,19 @@ async def run(opts: RunOptions, stop: asyncio.Event | None = None) -> None:
         transport = (
             bus
             if kind == "loopback"
-            else build_transport(kind, host=LOCAL, port=elm.port if elm else elm_port)
+            else build_transport(
+                kind,
+                host=LOCAL,
+                port=elm.port if elm else elm_port,
+                search_timeout_s=coletor_cfg.search_timeout_s,
+            )
         )
         interval_ms = cfg.get("coletor", {}).get("intervalo_ms", 100)
         collector = Collector(
             transport,
             publisher,
             rates=coletor_cfg.plan,
-            timeout_ms=cfg.get("coletor", {}).get("timeout_ms", 100),
+            timeout_ms=coletor_cfg.timeout_ms,
             dtc_interval_s=cfg.get("coletor", {}).get("dtc_intervalo_s", 2.0),
         )
         await collector.start()

@@ -23,6 +23,7 @@ def build_transport(
     channel: str = "obd",
     host: str = "localhost",
     port: int = 35000,
+    search_timeout_s: float = 5.0,
 ) -> Transport:
     if kind == "can_virtual":
         return CanVirtualTransport(channel=channel)
@@ -31,7 +32,7 @@ def build_transport(
             raise ValueError("o transporte loopback precisa de uma ECU")
         return LoopbackTransport(ecu)
     if kind == "elm327_tcp":
-        return Elm327TcpTransport(host, port)
+        return Elm327TcpTransport(host, port, search_timeout_s=search_timeout_s)
     raise ValueError(f"transporte desconhecido: {kind!r} (opções: {', '.join(TRANSPORTS)})")
 
 
