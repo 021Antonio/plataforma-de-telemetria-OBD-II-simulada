@@ -38,3 +38,15 @@ para seguir em frente. Revise e ajuste quando for necessário.
 6. **Quadros.** `CanFrame` valida ID (0x7DF, 0x7E0–0x7E8) e DLC=8; o byte PCI do ISO-TP fica
    para a tarefa 02. Modo 04 rejeita resposta com mais de 1 byte.
 7. **Descrições de DTC.** Textos em português escritos por mim (exceto P0300, da spec).
+
+## Tarefa 02 (ISO-TP e Modos 02/09)
+
+1. **API do ISO-TP.** A tarefa pede funções puras sobre bytes e estados. Decisão: `segment`/`reassemble`
+   (sem tempo), `Reassembler.feed(frame, now)` e `Sender.start/on_flow_control/poll(now)` com estado
+   interno e tempo por parâmetro; nada de `time.time()`.
+2. **N_Cr.** O prazo de 1 s reinicia a cada CF. No emissor, a mesma janela vale para esperar o FC
+   (inclusive após FC WAIT e após o fim de um bloco). `IsoTpTimeout` herda de `ProtocolError`.
+3. **STmin reservado.** Valores 0x80–0xF0 e 0xFA–0xFF são tratados como 127 ms (recomendação da norma).
+4. **Modo 02.** Requisição `02 PID 00` (sempre quadro de congelamento 0); resposta com outro nº de quadro é rejeitada.
+5. **Modo 09.** Só o PID 0x02 (VIN); `Response.data` traz os 17 bytes ASCII. FC overflow levanta `ProtocolError`.
+6. **Testes.** `pythonpath = ["tests"]` no pytest para importar `tests/fakes.py` (`FakeClock`) sem conflito no mypy.

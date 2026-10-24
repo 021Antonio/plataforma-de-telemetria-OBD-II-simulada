@@ -87,3 +87,42 @@ def test_invalid_raw() -> None:
     for raw in (b"", b"\x99\x00", b"\x41\x0c"):
         with pytest.raises(ProtocolError):
             parse_response(raw)
+
+
+def test_mode02_request_and_response() -> None:
+    req = build_request(0x02, 0x0C)
+    assert req == bytes([0x02, 0x0C, 0x00])
+    r = parse_response(bytes([0x42, 0x0C, 0x00, 0x1F, 0x40]), req)
+    assert (r.mode, r.pid, r.data) == (2, 0x0C, b"\x1f\x40")
+
+
+def test_mode02_wrong_frame_or_pid_rejected() -> None:
+    req = build_request(0x02, 0x0C)
+    with pytest.raises(ProtocolError):
+        parse_response(bytes([0x42, 0x0D, 0x00, 0x10]), req)
+    with pytest.raises(ProtocolError):
+        parse_response(bytes([0x42, 0x0C, 0x01, 0x1F, 0x40]), req)
+    with pytest.raises(ProtocolError):
+        parse_response(bytes([0x42, 0x0C, 0x00, 0x1F]), req)
+
+
+def test_mode09_vin() -> None:
+    from obd.protocol.services import build_vin_response
+
+    req = build_request(0x09, 0x02)
+    assert req == bytes([0x09, 0x02])
+    raw = build_vin_response("1HGCM82633A004352")
+    assert raw[:3] == bytes([0x49, 0x02, 0x01]) and len(raw) == 20
+    r = parse_response(raw, req)
+    assert (r.mode, r.pid, r.data) == (9, 2, b"1HGCM82633A004352")
+
+
+def test_mode09_invalid_vin_or_response() -> None:
+    from obd.protocol.services import build_vin_response
+
+    with pytest.raises(ProtocolError):
+        build_vin_response("CURTO")
+    with pytest.raises(ProtocolError):
+        parse_response(bytes([0x49, 0x02, 0x01]) + b"A" * 16, build_request(9, 2))
+    with pytest.raises(ProtocolError):
+        build_request(0x09, 0x04)
