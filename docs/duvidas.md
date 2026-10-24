@@ -95,3 +95,22 @@ para seguir em frente. Revise e ajuste quando for necessário.
    sobre o `delay_ms` do construtor da ECU.
 9. **Config.** Seção `veiculo` em `config/default.yaml` lida por `VehicleConfig.from_yaml`; os perfis
    ficam em `config/profiles/` (`load_profile` aceita nome ou caminho).
+
+## Tarefa 05 (coletor)
+
+1. **Config do coletor.** Nova seção `coletor` em `config/default.yaml` (transporte, intervalo, timeout, DTC,
+   recuo e `plano` com `a_cada`/`prioridade` por PID), lida por `CollectorConfig.from_yaml`. Rápidos (todo
+   ciclo): rotação, MAP, borboleta e velocidade; lentos (a cada 5 ciclos): carga, temperaturas, combustível, tensão.
+2. **Relógios.** `clock` (monotônico, RTT e ciclo) e `wall_clock` (epoch, `ts` do `Sample`) injetáveis; o
+   padrão usa `time.monotonic`/`time.time` só no coletor, nunca no protocolo.
+3. **Recuo progressivo.** Aplicado a toda requisição: com `n >= limiar` falhas seguidas, espera
+   `min(max, base·2^(n-limiar))` antes de enviar; qualquer resposta válida zera a contagem (inclusive a do PID 0x01).
+4. **Falha conta como `invalid`.** Resposta com eco errado, tamanho errado ou negativa (7F). Timeout vai em `timeouts`.
+5. **Ciclo vazio.** Um ciclo sem nenhuma leitura válida ainda publica um `Sample` (valores vazios, erros
+   contados), para o `seq` não ter lacunas. Falha de publicação é registrada (`publish_failed`) e a amostra é
+   descartada; o servidor vê a lacuna pelo `seq`. Sem reenvio nem reconexão com recuo no `HttpPublisher` (fica para a tarefa do servidor).
+6. **Descoberta.** Segue o bit de continuação (0x20, 0x40). Se nada for anunciado, tenta de novo no ciclo seguinte.
+7. **DTCs.** A primeira leitura do PID 0x01 sempre lê o Modo 03 e publica um `DtcReport`; depois só se (MIL, contagem)
+   mudar. O `cycle_ms` não inclui essa verificação; todos os DTCs saem como `stored` (Modo 07 não é lido).
+8. **`elm327_tcp`.** `build_transport` levanta `NotImplementedError` até a tarefa 09. `loopback` exige uma `Ecu`.
+9. **RNF01.** Medido com `LoopbackTransport` e ECU em 10 ms fixos, relógio real, ciclo 0 (10 PIDs).

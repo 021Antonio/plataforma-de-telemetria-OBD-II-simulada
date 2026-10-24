@@ -31,3 +31,25 @@ veiculo:
   marcha_lenta_rpm: 800
   tau_arrefecimento_s: 120
   temperatura_ambiente_c: 25
+
+# Coletor (equivalente lógico do firmware do ESP32).
+coletor:
+  transporte: loopback  # can_virtual | loopback | elm327_tcp
+  intervalo_ms: 100     # período alvo do ciclo de leitura
+  timeout_ms: 100       # espera por resposta de cada PID
+  dtc_intervalo_s: 2.0  # período de leitura do PID 0x01 (e do Modo 03 se mudar)
+  recuo:                # recuo progressivo após falhas seguidas
+    limiar: 3           # falhas seguidas que ativam o recuo
+    base_ms: 50         # primeira espera; dobra a cada nova falha
+    max_ms: 2000
+  # Plano de leitura por PID: a_cada = ciclos entre leituras; prioridade menor vai primeiro.
+  plano:
+    0x0C: {a_cada: 1, prioridade: 0}   # rotação (rápido)
+    0x0B: {a_cada: 1, prioridade: 1}   # MAP (rápido)
+    0x11: {a_cada: 1, prioridade: 2}   # borboleta (rápido)
+    0x0D: {a_cada: 1, prioridade: 3}   # velocidade (rápido)
+    0x04: {a_cada: 5, prioridade: 4}   # carga
+    0x05: {a_cada: 5, prioridade: 5}   # líquido de arrefecimento (lento)
+    0x0F: {a_cada: 5, prioridade: 6}   # ar de admissão (lento)
+    0x2F: {a_cada: 5, prioridade: 7}   # combustível (lento)
+    0x42: {a_cada: 5, prioridade: 8}   # tensão (lento)
