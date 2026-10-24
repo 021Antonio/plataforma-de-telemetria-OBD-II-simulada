@@ -159,3 +159,44 @@ def test_stream_entrega_amostra_ingerida() -> None:
         assert http.post("/api/ingest/sample", json=sample.model_dump()).status_code == 202
         msg = ws.receive_json()
         assert msg["type"] == "sample" and msg["data"]["seq"] == 1
+
+
+@node
+def test_mesclar_guarda_ultimo_valor_de_cada_pid() -> None:
+    """Segunda amostra sem o PID lento mantém o valor lento (e atualiza o rápido)."""
+    out = _run_node(
+        "let m={};"
+        "m=g.mergeSample(m,{rpm:{value:900,unit:'rpm'},coolant:{value:80,unit:'C'}},100);"
+        "m=g.mergeSample(m,{rpm:{value:1500,unit:'rpm'}},100.1);"
+        "console.log(JSON.stringify([m.rpm.value,m.coolant.value,m.coolant.at,m.rpm.at]))"
+    )
+    assert out == [1500, 80, 100, 100.1]
+
+
+@node
+def test_mesclar_nao_altera_o_estado_anterior() -> None:
+    out = _run_node(
+        "const a=g.mergeSample({},{rpm:{value:1}},1);const b=g.mergeSample(a,{rpm:{value:2}},2);"
+        "console.log(JSON.stringify([a.rpm.value,b.rpm.value]))"
+    )
+    assert out == [1, 2]
+
+
+@node
+def test_defasagem_passa_de_5_s_e_ausente_so_se_nunca_chegou() -> None:
+    out = _run_node(
+        "const m=g.mergeSample({},{coolant:{value:80}},100);"
+        "console.log(JSON.stringify([g.freshness(m,'coolant',102),g.freshness(m,'coolant',105),"
+        "g.freshness(m,'coolant',105.1),g.freshness(m,'fuel_level',105)]))"
+    )
+    assert out == ["fresh", "fresh", "stale", "missing"]
+
+
+def test_titulos_dos_mostradores_nao_colam() -> None:
+    """Cada medida tem rótulo próprio e o cartão quebra linha em vez de estourar a largura."""
+    html = (DASHBOARD_DIR / "index.html").read_text()
+    css = (DASHBOARD_DIR / "style.css").read_text()
+    for rotulo in ("Velocidade", "Temperatura", "Combustível"):
+        assert re.search(rf'class="medida"[^>]*>\s*<h2>{rotulo}</h2>', html), rotulo
+    assert re.search(r"\.digits\s*\{[^}]*(grid|flex-wrap)", css)
+    assert re.search(r"\.medida\s*\{[^}]*min-width:\s*0", css)

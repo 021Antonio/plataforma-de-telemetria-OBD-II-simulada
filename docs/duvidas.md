@@ -234,3 +234,22 @@ para seguir em frente. Revise e ajuste quando for necessário.
    `docker compose` não pôde ser validado aqui (Docker ausente no ambiente).
 6. **`make run` e Ctrl+C.** O encerramento limpo (código 0, sem traceback) é provado por SIGINT
    e SIGTERM nos testes de subprocesso; o `make` em si propaga o código do processo.
+
+## Tarefa 14 (correções do dashboard e do painel)
+
+1. **Fonte da amostra.** O `python -m obd run` usa `coletor.transporte` (padrão `loopback`);
+   `can.transporte: virtual` não era lido por nada e contradizia o `source` das amostras.
+   Decisão: `can.transporte` passou a `loopback` (mesmo valor) e o teste de integração compara
+   `source` de `/api/latest` com o transporte configurado. O campo já refletia a verdade
+   (`transport.name`); só a configuração estava incoerente.
+2. **PIDs lentos ausentes.** O ajuste de mistura (0x06) não estava no plano do coletor, então a
+   barra ficava sempre em "–". Decisão: 0x06 entrou no plano (a cada 5 ciclos) e em `pids`,
+   junto com 0x42 (tensão).
+3. **Defasagem.** Valor sem atualização por mais de 5 s fica esmaecido (`.defasado`); só é
+   "ausente" (–) se nunca chegou. Na reconexão o replay de 60 s carimba os valores com a hora
+   da chegada (a amostra não traz a hora de leitura de cada PID no dashboard).
+4. **Inspeção das capturas (1280 px).** `docs/img/dashboard.png`: sem "–" em velocidade,
+   temperatura, combustível e nas quatro barras; rótulos VELOCIDADE/TEMPERATURA/COMBUSTÍVEL
+   separados; textos "3000 rpm" e "-0.62 bar" não cobrem mais os números da escala.
+   `docs/img/painel.png`: botões "Automático" inteiros e sliders visíveis. Observação: o gráfico
+   de 60 s mostra só o degrau de 800 para 3000 rpm no início da sessão (captura feita em ~5 s).

@@ -11,8 +11,13 @@ main { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); g
 .card.wide { grid-column:1/-1; }
 h2 { font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:#556; margin:0 0 .4rem; }
 .gtext { font:600 20px system-ui; fill:var(--ink); }
-.digits { display:flex; justify-content:space-around; text-align:center; }
-.big { font-size:2.4rem; font-weight:700; }
+.digits { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.5rem; text-align:center; }
+.dupla { grid-column:span 2; }
+@media (max-width:700px) { .dupla { grid-column:auto; } }
+.medida { min-width:0; }
+.medida h2 { letter-spacing:0; }
+.defasado { opacity:.4; }
+.big { font-size:clamp(1.6rem,3vw,2.4rem); font-weight:700; }
 .bars label { display:block; margin-bottom:.6rem; }
 .bars label span { float:right; font-variant-numeric:tabular-nums; }
 .bar { height:12px; background:#eef0f5; border-radius:6px; overflow:hidden; position:relative; margin-top:.2rem; }

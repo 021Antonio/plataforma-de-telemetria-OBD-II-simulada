@@ -206,3 +206,29 @@ def test_sinal_encerra_com_codigo_0_em_ate_5s(rig: Rig, sinal: signal.Signals) -
     assert rig.proc.wait(timeout=5) == 0
     assert rig.proc.stderr is not None
     assert "Traceback" not in rig.proc.stderr.read().decode()
+
+
+def test_source_reporta_o_transporte_configurado(rig: Rig) -> None:
+    import yaml
+
+    cfg = yaml.safe_load((Path(__file__).resolve().parents[2] / "config/default.yaml").read_text())
+    _espera_saudavel(rig)
+    assert _until(lambda: _latest(rig) is not None, 10)
+    s = _latest(rig)
+    assert s is not None
+    assert s["source"] == cfg["coletor"]["transporte"]
+    assert cfg["can"]["transporte"] == cfg["coletor"]["transporte"]
+
+
+def test_pids_lentos_chegam_no_plano_padrao(rig: Rig) -> None:
+    _espera_saudavel(rig)
+    lentos = {"coolant", "fuel_level", "voltage", "short_fuel_trim"}
+
+    vistos: set[str] = set()
+    limite = time.monotonic() + 5
+    while time.monotonic() < limite and not lentos <= vistos:
+        s = _latest(rig)
+        if s:
+            vistos |= set(s["values"])
+        time.sleep(0.05)
+    assert lentos <= vistos

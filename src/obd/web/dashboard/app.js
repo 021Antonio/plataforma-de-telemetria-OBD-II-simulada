@@ -26,7 +26,7 @@ const BARS = {
 
 const state = {
   ws: null, open: false, attempt: 0, lastSampleAt: null, lastSeq: null,
-  times: [], series: {}, descriptions: {}, errors: { timeouts: 0, invalid: 0 }, latest: null,
+  times: [], series: {}, descriptions: {}, errors: { timeouts: 0, invalid: 0 }, latest: {},
 };
 
 function polar(angleDeg, r) {
@@ -57,9 +57,14 @@ function setNeedle(id, angle) {
   $(id).setAttribute("transform", `rotate(${angle})`);
 }
 
-function val(sample, name) {
-  const v = sample.values[name];
+function val(latest, name) {
+  const v = latest[name];
   return v === undefined ? null : v.value;
+}
+
+// Esmaece o mostrador cujo valor passou de 5 s sem atualização.
+function markStale(latest, name, id, now) {
+  $(id).closest(".medida, label, section").classList.toggle("defasado", G.freshness(latest, name, now) === "stale");
 }
 
 function setBar(name, v) {
@@ -82,25 +87,29 @@ function setDigit(id, v, zones) {
   el.style.color = v === null || !zones ? "" : COLORS[G.zoneColor(v, zones)];
 }
 
-function render(sample) {
-  const rpm = val(sample, "rpm");
+function render(latest, now) {
+  const rpm = val(latest, "rpm");
   if (rpm !== null) {
     setNeedle("rpm-needle", G.needleAngle(rpm, 0, RPM_MAX));
     $("rpm-text").textContent = rpm.toFixed(0) + " rpm";
   }
-  const map = val(sample, "map");
+  const map = val(latest, "map");
   if (map !== null) {
     const bar = G.mapRelativeBar(map);
     setNeedle("map-needle", G.needleAngle(bar, MAP_MIN_BAR, MAP_MAX_BAR));
     $("map-text").textContent = bar.toFixed(2) + " bar";
   }
-  setDigit("speed", val(sample, "speed"), ZONES.speed);
-  setDigit("coolant", val(sample, "coolant"), ZONES.coolant);
-  setDigit("fuel", val(sample, "fuel_level"), ZONES.fuel);
+  setDigit("speed", val(latest, "speed"), ZONES.speed);
+  setDigit("coolant", val(latest, "coolant"), ZONES.coolant);
+  setDigit("fuel", val(latest, "fuel_level"), ZONES.fuel);
   for (const name of Object.keys(BARS)) {
-    const v = val(sample, name);
+    const v = val(latest, name);
     if (v !== null) setBar(name, v);
+    markStale(latest, name, "bar-" + (BARS[name].id || name), now);
   }
+  markStale(latest, "speed", "speed", now);
+  markStale(latest, "coolant", "coolant", now);
+  markStale(latest, "fuel_level", "fuel", now);
 }
 
 function drawChart() {
@@ -129,7 +138,7 @@ function onSample(sample) {
   if (state.lastSeq !== null && sample.seq <= state.lastSeq) return; // repetição do replay
   state.lastSeq = sample.seq;
   state.lastSampleAt = now;
-  state.latest = sample;
+  state.latest = G.mergeSample(state.latest, sample.values, now);
   state.times.push(now);
   state.times = state.times.filter((t) => now - t <= RATE_WINDOW_S);
   for (const [name, v] of Object.entries(sample.values)) {
@@ -141,7 +150,7 @@ function onSample(sample) {
   state.errors = err;
   $("cycle").textContent = sample.cycle_ms.toFixed(1);
   $("latency").textContent = Math.max(0, (now - sample.ts) * 1000).toFixed(0);
-  render(sample);
+  render(state.latest, now);
 }
 
 function onDtc(report) {
@@ -175,6 +184,7 @@ function refreshState() {
     $("latency").textContent = "–";
     $("cycle").textContent = "–";
   }
+  render(state.latest, now);
   drawChart();
 }
 

@@ -69,6 +69,16 @@ section {
   padding: 1rem;
 }
 
+section.largo {
+  grid-column: span 2;
+}
+
+@media (max-width: 760px) {
+  section.largo {
+    grid-column: auto;
+  }
+}
+
 section.monitor {
   grid-column: 1 / -1;
 }
@@ -87,6 +97,7 @@ label.inline {
 
 input[type="range"] {
   width: 60%;
+  min-width: 0;
   vertical-align: middle;
 }
 
@@ -122,10 +133,14 @@ button:hover {
 
 .variavel {
   display: grid;
-  grid-template-columns: 11rem 1fr 4rem auto;
+  grid-template-columns: minmax(6rem, 11rem) minmax(0, 1fr) 4rem auto;
   align-items: center;
   gap: 0.5rem;
   padding: 0.3rem 0;
+}
+
+.variavel input[type="range"] {
+  width: 100%;
 }
 
 .variavel output {

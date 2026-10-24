@@ -18,29 +18,29 @@
 <main id="panels">
   <section class="card">
     <h2>Rotação</h2>
-    <svg id="rpm-gauge" viewBox="-100 -100 200 160" role="img" aria-label="Conta-giros">
+    <svg id="rpm-gauge" viewBox="-100 -100 200 170" role="img" aria-label="Conta-giros">
       <path id="rpm-redline" fill="none" stroke="#d33" stroke-width="6"/>
       <path d="M-78 45 A90 90 0 1 1 78 45" fill="none" stroke="#ccd" stroke-width="3"/>
       <g id="rpm-ticks"></g>
       <line id="rpm-needle" x1="0" y1="0" x2="0" y2="-72" stroke="#223" stroke-width="3" stroke-linecap="round"/>
       <circle r="6" fill="#223"/>
-      <text id="rpm-text" y="38" text-anchor="middle" class="gtext">–</text>
+      <text id="rpm-text" y="58" text-anchor="middle" class="gtext">–</text>
     </svg>
   </section>
   <section class="card">
     <h2>Coletor de admissão</h2>
-    <svg id="map-gauge" viewBox="-100 -100 200 160" role="img" aria-label="Manômetro do coletor">
+    <svg id="map-gauge" viewBox="-100 -100 200 170" role="img" aria-label="Manômetro do coletor">
       <path d="M-78 45 A90 90 0 1 1 78 45" fill="none" stroke="#ccd" stroke-width="3"/>
       <g id="map-ticks"></g>
       <line id="map-needle" x1="0" y1="0" x2="0" y2="-72" stroke="#223" stroke-width="3" stroke-linecap="round"/>
       <circle r="6" fill="#223"/>
-      <text id="map-text" y="38" text-anchor="middle" class="gtext">–</text>
+      <text id="map-text" y="58" text-anchor="middle" class="gtext">–</text>
     </svg>
   </section>
-  <section class="card digits">
-    <div><h2>Velocidade</h2><span id="speed" class="big">–</span> km/h</div>
-    <div><h2>Temperatura</h2><span id="coolant" class="big">–</span> °C</div>
-    <div><h2>Combustível</h2><span id="fuel" class="big">–</span> %</div>
+  <section class="card digits dupla">
+    <div class="medida"><h2>Velocidade</h2><span id="speed" class="big">–</span> km/h</div>
+    <div class="medida"><h2>Temperatura</h2><span id="coolant" class="big">–</span> °C</div>
+    <div class="medida"><h2>Combustível</h2><span id="fuel" class="big">–</span> %</div>
   </section>
   <section class="card bars">
     <label>Borboleta <span id="val-throttle">–</span><div class="bar"><i id="bar-throttle"></i></div></label>
