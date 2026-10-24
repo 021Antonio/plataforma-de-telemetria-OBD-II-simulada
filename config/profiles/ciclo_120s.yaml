@@ -1,0 +1,8 @@
+name: ciclo_120s
+loop: true
+steps:
+  - {t: 0,   speed: 0,  throttle: 0.0}    # marcha lenta
+  - {t: 15,  speed: 80, throttle: 0.60}   # aceleração de 0 a 80 km/h
+  - {t: 60,  speed: 80, throttle: 0.25}   # cruzeiro
+  - {t: 90,  speed: 0,  throttle: 0.0}    # desaceleração e parada
+  - {t: 120, speed: 0,  throttle: 0.0}    # fim do ciclo (marcha lenta)

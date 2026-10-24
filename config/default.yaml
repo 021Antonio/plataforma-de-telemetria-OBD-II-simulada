@@ -22,3 +22,12 @@ pids:
   - 0x0F   # temperatura do ar de admissão
   - 0x11   # posição do acelerador
   - 0x2F   # nível de combustível
+
+# Modelo de veículo simulado (compacto 1.6 aspirado; valores ilustrativos).
+veiculo:
+  raio_pneu_m: 0.30
+  relacao_final: 4.06
+  relacoes_marcha: [3.62, 2.19, 1.41, 1.03, 0.81]
+  marcha_lenta_rpm: 800
+  tau_arrefecimento_s: 120
+  temperatura_ambiente_c: 25

@@ -71,3 +71,27 @@ para seguir em frente. Revise e ajuste quando for necessário.
 9. **FC do testador.** `bs` e `stmin` são parâmetros do transporte; o FC vai em 0x7E0. Uma requisição por vez (lock).
 10. **Atraso.** `delay_ms=(min, max)` sorteia uniformemente por requisição com `random.Random(seed)`; só o
     primeiro quadro é atrasado. Perda, corrupção, ECU muda e `STmin` do lado da ECU ficam para a tarefa 04.
+
+## Tarefa 04 (modelo de veículo e falhas)
+
+1. **Ruído.** O ruído gaussiano entra no valor reportado (o que a ECU codifica e registra em `log`), não
+   no estado físico limpo (`VehicleModel.state`). `VehicleConfig.noise` multiplica os desvios-padrão
+   (0 desliga); combustível não tem ruído. Valores são limitados à faixa de cada PID.
+2. **Perfil.** Os passos são degraus (valem até o próximo `t`); a velocidade segue o alvo com aceleração
+   máxima de 10 km/h/s e desaceleração de 15 km/h/s. Com `loop`, o período é o `t` do último passo.
+3. **Carga, MAP, marchas.** Fórmulas ilustrativas: carga = 15 + 85·borboleta·(0,4 + 0,6·rpm/6000);
+   MAP = min(101, 28 + 0,73·carga); trocas de marcha em 25/45/65/85 km/h; marcha lenta 800 rpm, corte 6500.
+4. **Determinismo.** O modelo avança em passos fixos de 10 ms até `clock()`; o resultado não depende de
+   quantas vezes ou com que granularidade se consulta. Semente do modelo e da ECU/falhas são independentes.
+5. **DTC com instante.** `FaultInjector.schedule_dtc(code, at)` é aplicado pela ECU de forma preguiçosa, na
+   primeira `on_frame`/`poll` com `clock() >= at`; o freeze frame é capturado nesse momento. Para injeção
+   imediata use `Ecu.add_dtc`. DTC pendente não gera freeze frame (como na tarefa 03).
+6. **Perda e corrupção.** Sorteadas por requisição aceita: perda descarta a resposta (a requisição não é
+   processada nem logada); corrupção inverte um bit do eco de modo ou de PID da resposta de aplicação.
+   Os dois usam o RNG do `FaultInjector` e só consomem semente quando a probabilidade é > 0.
+7. **ECU muda.** Ignora requisições e FCs e descarta resposta em andamento; ao religar volta ao normal.
+8. **Atraso de ISO-TP.** `STmin`/`BS` do injetor são impostos ao emissor da ECU sobrepondo o FC do testador:
+   STmin = máximo entre os dois, BS = menor valor não nulo. `set_delay` do injetor tem precedência
+   sobre o `delay_ms` do construtor da ECU.
+9. **Config.** Seção `veiculo` em `config/default.yaml` lida por `VehicleConfig.from_yaml`; os perfis
+   ficam em `config/profiles/` (`load_profile` aceita nome ou caminho).

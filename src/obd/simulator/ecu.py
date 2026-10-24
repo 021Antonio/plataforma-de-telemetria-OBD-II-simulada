@@ -44,6 +44,7 @@ from obd.protocol.services import (
     build_freeze_response,
     build_vin_response,
 )
+from obd.simulator.faults import FaultInjector
 
 ID_PHYSICAL = ID_PHYSICAL_REQUEST[0]  # 0x7E0: endereço físico da ECU do motor
 DEFAULT_VIN = "9BWZZZ377VT004251"
@@ -54,7 +55,7 @@ _EPS = 1e-9
 
 
 class PidSource(Protocol):
-    """Valor físico real de cada PID; o modelo de veículo (tarefa 04) será adaptado a isto."""
+    """Valor físico real de cada PID (`VehicleModel` e `FakeVehicleModel` o implementam)."""
 
     def value(self, pid: int) -> float: ...
 
@@ -73,11 +74,13 @@ class Ecu:
         vin: str = DEFAULT_VIN,
         delay_ms: tuple[int, int] = (0, 0),
         seed: int = 0,
+        faults: FaultInjector | None = None,
     ) -> None:
         self._model = model
         self._clock = clock
         self._vin = vin
         self._rng = random.Random(seed)
+        self.faults = faults if faults is not None else FaultInjector(seed)
         self._delay_ms = (0, 0)
         self.set_response_delay(*delay_ms)
         self._pids: frozenset[int] = frozenset()
@@ -110,13 +113,18 @@ class Ecu:
             raise ValueError(f"atraso inválido: ({ms_min}, {ms_max})")
         self._delay_ms = (ms_min, ms_max)
 
+    def _active_pids(self) -> frozenset[int]:
+        return self._pids - self.faults.unsupported
+
     def add_dtc(self, code: str, *, pending: bool = False) -> None:
         dtc.code_to_bytes(code)  # valida
         target = self._pending if pending else self._stored
         if code not in target:
             target.append(code)
         if not pending and not self._freeze:
-            self._freeze = {pid: PIDS[pid].encode(self._model.value(pid)) for pid in self._pids}
+            self._freeze = {
+                pid: PIDS[pid].encode(self._model.value(pid)) for pid in self._active_pids()
+            }
 
     def clear_dtcs(self) -> None:
         self._stored.clear()
@@ -127,6 +135,10 @@ class Ecu:
 
     def on_frame(self, can_id: int, data: bytes) -> None:
         if len(data) != FRAME_SIZE:
+            return
+        self._apply_due_dtcs()
+        if self.faults.mute:
+            self._drop_response()
             return
         if can_id == ID_PHYSICAL and data[0] >> 4 == isotp.PCI_FC:
             self._on_flow_control(data)
@@ -141,25 +153,55 @@ class Ecu:
         if payload is None:
             return
         self._request_count += 1
+        self._drop_response()
+        if self.faults.drops():
+            return
         response = self.process(payload, self._request_count)
+        if response is not None:
+            response = self.faults.corrupt(response)
+            delay = self._rng.uniform(*(self.faults.delay_ms or self._delay_ms)) / 1000
+            self._scheduled = (now + delay, response)
+
+    def _drop_response(self) -> None:
         self._sender = None
         self._scheduled = None
-        if response is not None:
-            delay = self._rng.uniform(*self._delay_ms) / 1000
-            self._scheduled = (now + delay, response)
+
+    def _apply_due_dtcs(self) -> None:
+        for d in self.faults.pop_due_dtcs(self._clock()):
+            self.add_dtc(d.code, pending=d.pending)
 
     def _on_flow_control(self, data: bytes) -> None:
         if self._sender is None:
             return
         now = self._clock()
         try:
-            self._sender.on_flow_control(data, now)
+            self._sender.on_flow_control(self._shape_flow_control(data), now)
         except ProtocolError:
             if data[0] & 0xF == isotp.FC_OVERFLOW:
                 self._sender = None
 
+    def _shape_flow_control(self, data: bytes) -> bytes:
+        """Aplica o atraso de ISO-TP injetado (STmin mínimo e BS máximo) ao FC do testador."""
+        faults = self.faults
+        if not (faults.stmin_ms or faults.block_size):
+            return data
+        fc = isotp.parse_flow_control(data)
+        if fc.status != isotp.FC_CONTINUE:
+            return data
+        stmin_ms = round(isotp.decode_stmin(fc.stmin) * 1000)
+        block = (
+            min(fc.block_size, faults.block_size)
+            if fc.block_size and faults.block_size
+            else (fc.block_size or faults.block_size)
+        )
+        return isotp.flow_control_frame(block, max(stmin_ms, faults.stmin_ms))
+
     def poll(self) -> list[CanFrame]:
         """Quadros devidos neste instante (atraso vencido, CFs liberados pelo FC)."""
+        self._apply_due_dtcs()
+        if self.faults.mute:
+            self._drop_response()
+            return []
         now = self._clock()
         out: list[CanFrame] = []
         if self._scheduled is not None and now + _EPS >= self._scheduled[0]:
@@ -181,7 +223,7 @@ class Ecu:
     # ---- serviços ----
 
     def _advertised(self) -> frozenset[int]:
-        found = set(self._pids) | {MONITOR_STATUS_PID}
+        found = set(self._active_pids()) | {MONITOR_STATUS_PID}
         for base in SUPPORT_PIDS[:-1]:
             if any(p > base + 0x20 for p in found):
                 found.add(base + 0x20)
@@ -192,6 +234,8 @@ class Ecu:
         if not payload:
             return None
         mode, n = payload[0], len(payload)
+        if mode in self.faults.negative:
+            return _negative(mode, self.faults.negative[mode])
         if mode == MODE_CURRENT:
             return self._mode01(payload, request_id) if n == 2 else self._bad_length(mode)
         if mode == MODE_FREEZE:
@@ -227,7 +271,7 @@ class Ecu:
             return head + encode_supported(pid, advertised)
         if pid == MONITOR_STATUS_PID:
             return head + encode_monitor_status(bool(self._stored), len(self._stored))
-        if pid not in self._pids:
+        if pid not in self._active_pids():
             return None
         value = self._model.value(pid)
         self.log.append((request_id, value))
