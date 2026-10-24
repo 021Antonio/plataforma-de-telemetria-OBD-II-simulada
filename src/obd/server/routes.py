@@ -65,19 +65,12 @@ def build_router(state: ServerState) -> APIRouter:
 
     @router.post("/api/ingest/sample", status_code=202)
     async def ingest_sample(sample: Sample) -> Response:
-        run_id = await state.current_run(sample.source)
-        received_at = state.clock()
-        latency_ms = (received_at - sample.ts) * 1000.0
-        inserted = await state.storage.insert_sample(run_id, sample, received_at, latency_ms)
-        if inserted:
-            state.hub.publish({"type": "sample", "data": sample.model_dump()})
+        await state.ingest_sample(sample)
         return Response(status_code=202)
 
     @router.post("/api/ingest/dtc", status_code=202)
     async def ingest_dtc(report: DtcReport) -> Response:
-        run_id = await state.current_run("desconhecida")
-        await state.storage.insert_dtc_report(run_id, report, state.clock())
-        state.hub.publish({"type": "dtc", "data": report.model_dump()})
+        await state.ingest_dtc(report)
         return Response(status_code=202)
 
     @router.get("/api/latest", response_model=Sample)

@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from obd.protocol.schemas import DtcReport, Sample
 from obd.server.storage import Storage
 
 
@@ -44,3 +45,18 @@ class ServerState:
                 if self.run_id is None:
                     self.run_id = await self.storage.create_run(self.clock(), source)
         return self.run_id
+
+    async def ingest_sample(self, sample: Sample) -> bool:
+        """Grava e difunde a amostra (caminho comum a HTTP e MQTT); False se `seq` duplicado."""
+        run_id = await self.current_run(sample.source)
+        received_at = self.clock()
+        latency_ms = (received_at - sample.ts) * 1000.0
+        inserted = await self.storage.insert_sample(run_id, sample, received_at, latency_ms)
+        if inserted:
+            self.hub.publish({"type": "sample", "data": sample.model_dump()})
+        return inserted
+
+    async def ingest_dtc(self, report: DtcReport) -> None:
+        run_id = await self.current_run("desconhecida")
+        await self.storage.insert_dtc_report(run_id, report, self.clock())
+        self.hub.publish({"type": "dtc", "data": report.model_dump()})

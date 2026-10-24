@@ -17,6 +17,7 @@ dependencies = [
     "pydantic>=2",
     "pyyaml",
     "httpx",
+    "aiomqtt",
 ]
 
 [project.optional-dependencies]
@@ -37,8 +38,9 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--strict-markers"
+addopts = "--strict-markers -m \"not broker\""
 asyncio_mode = "auto"
+markers = ["broker: precisa de um broker MQTT real em localhost:1883 (fora do make test)"]
 pythonpath = ["tests"]
 
 [tool.coverage.run]

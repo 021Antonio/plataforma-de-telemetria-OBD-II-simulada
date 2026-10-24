@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Mapping
+import asyncio
+from collections.abc import AsyncIterator, Callable, Iterable, Mapping
 
 from obd.protocol.schemas import PidValue, Sample, SampleErrors
 
@@ -87,3 +88,72 @@ class ScriptedTransport:
     async def request(self, payload: bytes, timeout_ms: int = 100) -> bytes | None:
         self.calls.append(payload)
         return self._script.get(payload)
+
+
+class FakeBrokerLink:
+    """Cliente do `FakeBroker`: mesma interface de `MqttLink`."""
+
+    def __init__(self, broker: FakeBroker) -> None:
+        self._broker = broker
+        self._queue: asyncio.Queue[tuple[str, bytes] | None] = asyncio.Queue()
+        self._patterns: list[str] = []
+        self.connected = False
+
+    async def connect(self) -> None:
+        if not self._broker.up:
+            raise ConnectionError("broker fora do ar")
+        self.connected = True
+        self._broker.links.append(self)
+
+    async def close(self) -> None:
+        self.connected = False
+        if self in self._broker.links:
+            self._broker.links.remove(self)
+
+    async def publish(self, topic: str, payload: bytes, qos: int) -> None:
+        if not self.connected or not self._broker.up:
+            raise ConnectionError("sem conexão com o broker")
+        self._broker.published.append((topic, payload, qos))
+        for link in self._broker.links:
+            if any(_topic_matches(p, topic) for p in link._patterns):
+                link._queue.put_nowait((topic, payload))
+
+    async def subscribe(self, topics: Iterable[tuple[str, int]]) -> None:
+        if not self.connected:
+            raise ConnectionError("sem conexão com o broker")
+        self._patterns.extend(topic for topic, _ in topics)
+
+    async def messages(self) -> AsyncIterator[tuple[str, bytes]]:
+        while True:
+            item = await self._queue.get()
+            if item is None:
+                raise ConnectionError("conexão derrubada")
+            yield item
+
+
+def _topic_matches(pattern: str, topic: str) -> bool:
+    p, t = pattern.split("/"), topic.split("/")
+    return len(p) == len(t) and all(a in ("+", b) for a, b in zip(p, t, strict=True))
+
+
+class FakeBroker:
+    """Broker MQTT em memória: roteia por tópico (`+`) e simula queda e volta."""
+
+    def __init__(self) -> None:
+        self.up = True
+        self.links: list[FakeBrokerLink] = []
+        self.published: list[tuple[str, bytes, int]] = []
+
+    def link(self) -> FakeBrokerLink:
+        return FakeBrokerLink(self)
+
+    def go_down(self) -> None:
+        """Derruba todas as conexões; novas conexões falham até `come_back`."""
+        self.up = False
+        for link in list(self.links):
+            link.connected = False
+            link._queue.put_nowait(None)
+        self.links.clear()
+
+    def come_back(self) -> None:
+        self.up = True

@@ -32,6 +32,14 @@ veiculo:
   tau_arrefecimento_s: 120
   temperatura_ambiente_c: 25
 
+# Canal entre coletor e servidor. O HTTP é o padrão; mqtt exige o Mosquitto (docker compose --profile mqtt).
+publisher: http       # http | mqtt
+servidor_url: http://localhost:8000
+mqtt:
+  host: localhost
+  porta: 1883
+  veiculo: simulado   # tópicos telemetria/<veiculo>/dados e telemetria/<veiculo>/dtc
+
 # Coletor (equivalente lógico do firmware do ESP32).
 coletor:
   transporte: loopback  # can_virtual | loopback | elm327_tcp

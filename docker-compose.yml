@@ -1,0 +1,10 @@
+# Serviços de apoio. O Mosquitto só sobe com o perfil mqtt:
+#   docker compose --profile mqtt up -d mosquitto
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    profiles: ["mqtt"]
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro

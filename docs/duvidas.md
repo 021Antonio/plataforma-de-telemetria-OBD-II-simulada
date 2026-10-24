@@ -151,3 +151,20 @@ para seguir em frente. Revise e ajuste quando for necessário.
     O caminho do arquivo SQLite e o processo que sobe o servidor ficam para `make run`, ainda não implementado.
 14. **Aviso de depreciação.** O `TestClient` do Starlette avisa que `httpx` está depreciado (sugere `httpx2`).
     Não foi suprimido; a versão do FastAPI instalada é a que impõe esse aviso.
+
+## Tarefa 12 (MQTT)
+
+1. **Arquivos fora da lista.** `src/obd/mqtt_common.py` guarda tópicos, recuo e o adaptador `AiomqttLink`, para
+   publicador e assinante não dependerem um do outro. Ambos usam a interface `MqttLink`, que o `FakeBroker` implementa.
+2. **Broker fora do ar.** `MqttPublisher` não desiste: repete a mensagem pendente com recuo 1, 2, 4... 30 s, então
+   `seq` nunca pula nem inverte. Custo: o laço do coletor espera enquanto o broker estiver caído (em QoS 0 uma
+   mensagem em trânsito na queda ainda pode se perder; o servidor a vê como lacuna de `seq`).
+3. **Veículo e fonte.** O nome do veículo vem de `mqtt.veiculo` (padrão `simulado`); o assinante usa `+` e aceita
+   qualquer veículo, gravando tudo na mesma execução (a spec não define multiveículo). Relatório de DTC grava na
+   execução com fonte `desconhecida`, igual ao HTTP.
+4. **Mensagem inválida.** JSON fora do schema é descartado e contado em `MqttSubscriber.rejected` (sem 4xx para devolver).
+5. **Ativação no servidor.** `create_app(..., mqtt_link=fábrica)` liga o assinante no `lifespan`. Ler `publisher`
+   do YAML e subir o processo fica para o `make run`, ainda não implementado. `build_publisher(config)` faz a escolha no coletor.
+6. **Teste `broker`.** `addopts` ganhou `-m "not broker"`; rode `pytest -m broker` com `docker compose --profile mqtt up -d mosquitto`.
+   O teste real não foi executado aqui (sem Docker/broker); foi pulado por design.
+7. **`docker-compose.yml`.** Só tem o Mosquitto; os serviços do app não entraram (ainda não há `make run`).
