@@ -108,7 +108,8 @@ def main():
         tid = t["id"]
         if tid in a.skip or state.get(tid) == "ok":
             continue
-        falta = [d for d in t.get("depends_on", []) if state.get(str(d).zfill(2)) != "ok"]
+        falta = [d for d in t.get("depends_on", [])
+                 if state.get(str(d).zfill(2)) != "ok" and str(d).zfill(2) not in a.skip]
         print(f"[{tid}] {t['title']} ({t['model']})", flush=True)
         if falta:
             state[tid] = "pulada"
