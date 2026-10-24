@@ -37,4 +37,4 @@ make run       # sobe servidor, simulador e coletor
 
 ## Execução noturna
 
-`python scripts/run_night.py` roda todas as tarefas em ordem, sem aprovação (ver docs/PLAN.md). Logs em `runs-night/`.
+`python scripts/night.py` (cria .venv e roda `run_night.py` isolado) roda todas as tarefas em ordem, sem aprovação (ver docs/PLAN.md). Logs em `runs-night/`.
