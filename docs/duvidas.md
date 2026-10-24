@@ -305,3 +305,13 @@ para seguir em frente. Revise e ajuste quando for necessário.
 6. **Injeção no servidor.** `ErrorInjection` (`errors`, `extra_delay_ms`, `drop_connection_after(n)`,
    `record`/`seen`), desligada por padrão. `errors` vale só para comandos OBD; a queda é única
    e ocorre após responder o N-ésimo comando.
+
+## Tarefa 19 (firmware ESP32)
+
+1. **Erros de multiquadro.** CF fora de ordem, estouro de N_Cr (1 s) e FC recusado pelo barramento viram `CAN ERROR`; sem nenhuma resposta, `NO DATA`. O chip real pode usar `DATA ERROR` ou entregar a resposta parcial; sem comparação com um chip real.
+2. **Quadros fora de ordem.** A remontagem é estrita: sequência errada aborta (não reordena nem aceita duplicata). Reordenar exigiria buffer e não tem base na spec 04.
+3. **Controle de fluxo.** O firmware sempre envia `30 00 00` (continuar, sem bloco, STmin 0). A ECU de bancada ignora BS/STmin (sem relógio); o tratamento de STmin pela ECU real é do receptor do carro.
+4. **Modos além de 01, 02, 03, 09.** Respondem `NO DATA` sem tocar o barramento, inclusive 05, 06, 07, 08 e 0A (a spec 09 só mostra `0600`). Modo 04 só com `ALLOW_CLEAR_DTC 1`.
+5. **Resposta atrasada.** O `TwaiBus` limpa a fila de recepção antes de cada requisição (equivale ao descarte do transporte Python). Quadros de outros IDs são ignorados (máx. 256 por espera).
+6. **Não verificado.** O código de `firmware/src/` e `platformio.ini` não foram compilados aqui (sem a plataforma espressif32); pinos padrão (GPIO 5 e 4) são suposição e o autor deve conferir no DevKit.
+7. **`.gitignore`.** A regra `lib/` ignorava `firmware/lib/`; foi aberta uma exceção.

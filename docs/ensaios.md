@@ -109,6 +109,29 @@ Executado em 24/10/2026 com Mosquitto 2 real (`eclipse-mosquitto:2`, contêiner 
 - A diferença de ciclos por segundo (7,7 contra 9,3) vem do tempo gasto publicando: no HTTP o coletor espera a resposta de cada envio. Não foi investigada além disso.
 - Condição de rede: publicador e broker no mesmo computador, pela rede interna do Docker. Os números descrevem o custo do canal nesse arranjo e não representam um enlace real entre máquinas diferentes.
 
+## Firmware ESP32 (pendente do autor)
+
+O firmware (`firmware/`, ver `docs/hardware/esp32.md`) foi verificado só no PC: `make -C firmware test` e a suíte de conformidade contra `firmware/build/host_server` (41/41, 0 divergências). Nada abaixo foi executado em hardware.
+
+**Bancada (sem carro, `BENCH_MODE 1`)**
+
+1. Grave o firmware e conecte o PC ao ponto de acesso `OBD-ESP32` (`192.168.0.10`).
+2. `python -m tests.conformance --host 192.168.0.10 --port 35000` e registre as divergências.
+3. Aponte o coletor para `192.168.0.10:35000` por alguns minutos e confira perdas e latência.
+
+**Campo (no carro, `BENCH_MODE 0`, ignição ligada)**
+
+1. Confira ligações, terminação removida e o fusível; ligue o adaptador na porta OBD-II.
+2. Conecte ao Wi-Fi do adaptador e rode `ATZ`, `ATDP`, `0100`, `010C`, `0902` e `03` à mão.
+3. Rode o coletor por 5 minutos parado e depois em movimento, sem afirmar nada além do que foi medido.
+
+| Ensaio | Data | Resultado da suíte (OK/divergências) | Latência média (ms) | Perdas | Observações |
+| --- | --- | --- | --- | --- | --- |
+| Bancada, Wi-Fi AP | | | | | |
+| Bancada, Wi-Fi estação | | | | | |
+| Carro, parado | | | | | |
+| Carro, em movimento | | | | | |
+
 ## Repetir em uma segunda máquina
 
 1. Instale Python 3.12+ e `pip install -e ".[dev]"`; confira `python -m pytest -q --tb=short tests/unit tests/benchmarks -k "stats or smoke"`.

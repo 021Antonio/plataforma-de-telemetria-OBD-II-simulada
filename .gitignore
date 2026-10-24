@@ -228,3 +228,8 @@ runs/
 /data/
 *.exe
 docs/tcc/build/
+
+# Firmware: a regra "lib/" acima não vale para a biblioteca do ESP32
+!firmware/lib/
+firmware/build/
+firmware/.pio/
